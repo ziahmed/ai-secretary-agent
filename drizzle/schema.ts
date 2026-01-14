@@ -32,6 +32,8 @@ export const meetings = mysqlTable("meetings", {
   status: mysqlEnum("status", ["scheduled", "completed", "cancelled"]).default("scheduled").notNull(),
   minutesUrl: text("minutesUrl"), // S3 URL to meeting minutes document
   summaryText: text("summaryText"), // AI-generated summary
+  externalId: varchar("externalId", { length: 255 }), // ID from external source (Google Calendar, Gmail)
+  externalSource: varchar("externalSource", { length: 50 }), // Source: google_calendar, gmail, etc
   createdBy: int("createdBy").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

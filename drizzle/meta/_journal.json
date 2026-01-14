@@ -15,6 +15,13 @@
       "when": 1768355380729,
       "tag": "0001_petite_purifiers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1768359273817,
+      "tag": "0002_medical_caretaker",
+      "breakpoints": true
     }
   ]
 }

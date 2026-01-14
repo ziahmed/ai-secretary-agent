@@ -560,6 +560,201 @@ Priority: ${task.priority}`
         return { success: true, message: "Email sent successfully" };
       }),
   }),
+
+  // ============= Google Integration =============
+  google: router({
+    getAuthUrl: protectedProcedure.query(async () => {
+      const { getAuthUrl } = await import('./googleApi');
+      return { url: getAuthUrl() };
+    }),
+
+    handleCallback: protectedProcedure
+      .input(z.object({ code: z.string() }))
+      .mutation(async ({ input }) => {
+        const { getTokensFromCode } = await import('./googleApi');
+        const tokens = await getTokensFromCode(input.code);
+        
+        // In production, you'd save the refresh token securely
+        // For now, we'll return it to be manually added to env
+        return {
+          success: true,
+          refreshToken: tokens.refresh_token,
+          message: "Please add this refresh token to your environment variables as GOOGLE_REFRESH_TOKEN",
+        };
+      }),
+
+    syncCalendar: protectedProcedure
+      .input(z.object({ maxResults: z.number().optional().default(50) }))
+      .mutation(async ({ input, ctx }) => {
+        const { listCalendarEvents } = await import('./googleApi');
+        const events = await listCalendarEvents(input.maxResults);
+        
+        let syncedCount = 0;
+        for (const event of events) {
+          if (!event.summary || !event.start) continue;
+
+          const meetingDate = event.start.dateTime 
+            ? new Date(event.start.dateTime)
+            : event.start.date
+            ? new Date(event.start.date)
+            : null;
+
+          if (!meetingDate) continue;
+
+          // Check if meeting already exists by external ID
+          const existing = await db.getMeetingByExternalId(event.id || '');
+          if (existing) continue;
+
+          // Create new meeting from calendar event
+          await db.createMeeting({
+            title: event.summary,
+            description: event.description || null,
+            meetingDate,
+            location: event.location || null,
+            participants: event.attendees 
+              ? JSON.stringify(event.attendees.map((a: any) => a.email))
+              : null,
+            externalId: event.id || null,
+            externalSource: 'google_calendar',
+            createdBy: ctx.user.id,
+          });
+          syncedCount++;
+        }
+
+        return {
+          success: true,
+          totalEvents: events.length,
+          syncedCount,
+          message: `Synced ${syncedCount} new events from Google Calendar`,
+        };
+      }),
+
+    syncGmail: protectedProcedure
+      .input(z.object({ 
+        maxResults: z.number().optional().default(50),
+        query: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { listGmailMessages, parseEmailForMeetingInfo } = await import('./googleApi');
+        
+        // Search for emails that might contain meeting invites or task updates
+        const query = input.query || 'subject:(meeting OR invite OR calendar OR task OR action item)';
+        const messages = await listGmailMessages(input.maxResults, query);
+        
+        let processedCount = 0;
+        for (const message of messages) {
+          if (!message.id) continue;
+
+          try {
+            const emailData = await parseEmailForMeetingInfo(message.id);
+            
+            // Use LLM to analyze email and extract structured information
+            const analysis = await invokeLLM({
+              messages: [
+                {
+                  role: 'system',
+                  content: 'You are an AI assistant that analyzes emails to extract meeting information and action items. Extract any meeting details (title, date, time, location, participants) and action items from the email.',
+                },
+                {
+                  role: 'user',
+                  content: `Analyze this email and extract meeting information or action items:\n\nSubject: ${emailData.subject}\nFrom: ${emailData.from}\nDate: ${emailData.date}\n\nBody:\n${emailData.body || emailData.snippet}`,
+                },
+              ],
+              response_format: {
+                type: 'json_schema',
+                json_schema: {
+                  name: 'email_analysis',
+                  strict: true,
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      hasMeeting: { type: 'boolean' },
+                      meetingTitle: { type: 'string' },
+                      meetingDate: { type: 'string' },
+                      meetingLocation: { type: 'string' },
+                      hasActionItems: { type: 'boolean' },
+                      actionItems: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            description: { type: 'string' },
+                            owner: { type: 'string' },
+                            deadline: { type: 'string' },
+                          },
+                          required: ['description'],
+                          additionalProperties: false,
+                        },
+                      },
+                    },
+                    required: ['hasMeeting', 'hasActionItems'],
+                    additionalProperties: false,
+                  },
+                },
+              },
+            });
+
+            const messageContent = analysis.choices[0]?.message?.content;
+            const contentString = typeof messageContent === 'string' ? messageContent : '{}';
+            const result = JSON.parse(contentString);
+            
+            // Create meeting if found
+            if (result.hasMeeting && result.meetingTitle) {
+              const meetingDate = result.meetingDate ? new Date(result.meetingDate) : null;
+              if (meetingDate && !isNaN(meetingDate.getTime())) {
+                await db.createMeeting({
+                  title: result.meetingTitle,
+                  description: emailData.snippet,
+                  meetingDate,
+                  location: result.meetingLocation || null,
+                  externalId: message.id,
+                  externalSource: 'gmail',
+                  createdBy: ctx.user.id,
+                });
+              }
+            }
+
+            // Create action items if found
+            if (result.hasActionItems && result.actionItems?.length > 0) {
+              for (const item of result.actionItems) {
+                const deadline = item.deadline ? new Date(item.deadline) : null;
+                await db.createTask({
+                  title: item.description,
+                  description: `From email: ${emailData.subject}`,
+                  ownerEmail: item.owner || emailData.from,
+                  deadline: deadline && !isNaN(deadline.getTime()) ? deadline : null,
+                  priority: 'medium',
+                  createdBy: ctx.user.id,
+                });
+              }
+            }
+
+            processedCount++;
+          } catch (error) {
+            console.error(`Error processing email ${message.id}:`, error);
+          }
+        }
+
+        return {
+          success: true,
+          totalMessages: messages.length,
+          processedCount,
+          message: `Processed ${processedCount} emails from Gmail`,
+        };
+      }),
+
+    getSyncStatus: protectedProcedure.query(async () => {
+      const hasCredentials = !!(process.env.GOOGLE_CLIENT_ID && 
+                                process.env.GOOGLE_CLIENT_SECRET);
+      const hasRefreshToken = !!process.env.GOOGLE_REFRESH_TOKEN;
+      
+      return {
+        configured: hasCredentials,
+        authenticated: hasRefreshToken,
+        accountEmail: process.env.GOOGLE_ACCOUNT_EMAIL || 'Not set',
+      };
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

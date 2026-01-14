@@ -16,6 +16,7 @@ export default function Meetings() {
   const [description, setDescription] = useState("");
   const [meetingDate, setMeetingDate] = useState("");
   const [location, setLocation] = useState("");
+  const [participants, setParticipants] = useState("");
   const [transcript, setTranscript] = useState("");
   const [selectedMeetingId, setSelectedMeetingId] = useState<number | null>(null);
 
@@ -51,6 +52,7 @@ export default function Meetings() {
     setDescription("");
     setMeetingDate("");
     setLocation("");
+    setParticipants("");
     setTranscript("");
   };
 
@@ -60,11 +62,17 @@ export default function Meetings() {
       return;
     }
 
+    const participantsList = participants
+      .split(',')
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+
     createMutation.mutate({
       title,
       description,
       meetingDate: new Date(meetingDate),
       location,
+      participants: participantsList.length > 0 ? participantsList : undefined,
     });
   };
 
@@ -143,6 +151,18 @@ export default function Meetings() {
                     placeholder="Conference Room A"
                   />
                 </div>
+                <div>
+                  <Label htmlFor="participants" className="text-foreground">Participants</Label>
+                  <Input
+                    id="participants"
+                    value={participants}
+                    onChange={(e) => setParticipants(e.target.value)}
+                    placeholder="email1@example.com, email2@example.com"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Enter email addresses separated by commas
+                  </p>
+                </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
@@ -193,6 +213,19 @@ export default function Meetings() {
                 <CardContent>
                   {meeting.description && (
                     <p className="text-foreground mb-4">{meeting.description}</p>
+                  )}
+                  
+                  {meeting.participants && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-foreground mb-2">Participants:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {JSON.parse(meeting.participants).map((email: string, idx: number) => (
+                          <span key={idx} className="px-2 py-1 text-xs bg-muted rounded-full text-foreground">
+                            {email}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   )}
                   
                   {meeting.summaryText && (

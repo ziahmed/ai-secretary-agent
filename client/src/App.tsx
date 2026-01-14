@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Meetings from "./pages/Meetings";
 import Tasks from "./pages/Tasks";
 import ReviewQueue from "./pages/ReviewQueue";
+import GoogleSync from "./pages/GoogleSync";
 import Chat from "./pages/Chat";
 
 function Router() {
@@ -18,7 +19,8 @@ function Router() {
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/meetings"} component={Meetings} />
       <Route path={"/tasks"} component={Tasks} />
-      <Route path={"/review"} component={ReviewQueue} />
+        <Route path="/review" component={ReviewQueue} />
+      <Route path="/google-sync" component={GoogleSync} />
       <Route path={"/chat"} component={Chat} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />

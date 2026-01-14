@@ -124,6 +124,13 @@ export async function getMeetingById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getMeetingByExternalId(externalId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(meetings).where(eq(meetings.externalId, externalId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
 export async function getAllMeetings() {
   const db = await getDb();
   if (!db) return [];
