@@ -6,7 +6,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { storagePut } from "./storage";
 import * as db from "./db";
-import { sendMeetingInvite } from "./emailService";
+import { sendMeetingInvite, sendMeetingCancellation } from "./emailService";
 
 export const appRouter = router({
   system: systemRouter,
@@ -88,14 +88,57 @@ export const appRouter = router({
         location: z.string().optional(),
         participants: z.array(z.string()).optional(),
         status: z.enum(["scheduled", "completed", "cancelled"]).optional(),
+        cancellationReason: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
-        const { id, participants, ...updates } = input;
+      .mutation(async ({ input, ctx }) => {
+        const { id, participants, cancellationReason, ...updates } = input;
+        
+        // Get the meeting before update to check status change
+        const existingMeeting = await db.getMeetingById(id);
+        
         const updateData: any = { ...updates };
         if (participants) {
           updateData.participants = JSON.stringify(participants);
         }
-        return await db.updateMeeting(id, updateData);
+        
+        const updatedMeeting = await db.updateMeeting(id, updateData);
+        
+        // Send cancellation email if status changed to cancelled
+        if (input.status === 'cancelled' && existingMeeting && existingMeeting.status !== 'cancelled') {
+          const participantsList = existingMeeting.participants 
+            ? JSON.parse(existingMeeting.participants) 
+            : [];
+          
+          if (participantsList.length > 0) {
+            try {
+              await sendMeetingCancellation(
+                {
+                  to: participantsList,
+                  meetingTitle: existingMeeting.title,
+                  meetingDate: existingMeeting.meetingDate,
+                  location: existingMeeting.location || undefined,
+                  description: existingMeeting.description || undefined,
+                  organizerEmail: ctx.user.email || 'noreply@ai-secretary.com',
+                  organizerName: ctx.user.name || 'AI Secretary',
+                },
+                cancellationReason
+              );
+              
+              // Log the email send
+              await db.createEmailLog({
+                recipientEmail: participantsList.join(', '),
+                subject: `Meeting Cancelled: ${existingMeeting.title}`,
+                body: `Cancellation notification sent for ${existingMeeting.title}. Reason: ${cancellationReason || 'Not specified'}`,
+                emailType: 'meeting_cancellation',
+              });
+            } catch (error) {
+              console.error('Failed to send cancellation emails:', error);
+              // Don't fail the update if email sending fails
+            }
+          }
+        }
+        
+        return updatedMeeting;
       }),
 
     delete: protectedProcedure
@@ -103,6 +146,46 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await db.deleteMeeting(input.id);
         return { success: true };
+      }),
+
+    resendInvites: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const meeting = await db.getMeetingById(input.id);
+        if (!meeting) {
+          throw new Error('Meeting not found');
+        }
+        
+        if (!meeting.participants) {
+          throw new Error('No participants to send invites to');
+        }
+        
+        const participants = JSON.parse(meeting.participants);
+        
+        try {
+          await sendMeetingInvite({
+            to: participants,
+            meetingTitle: meeting.title,
+            meetingDate: meeting.meetingDate,
+            location: meeting.location || undefined,
+            description: meeting.description || undefined,
+            organizerEmail: ctx.user.email || 'noreply@ai-secretary.com',
+            organizerName: ctx.user.name || 'AI Secretary',
+          });
+          
+          // Log the email send
+          await db.createEmailLog({
+            recipientEmail: participants.join(', '),
+            subject: `Meeting Invitation (Resent): ${meeting.title}`,
+            body: `Meeting invite resent for ${meeting.title} on ${meeting.meetingDate.toLocaleString()}`,
+            emailType: 'meeting_invite',
+          });
+          
+          return { success: true, message: 'Invites resent successfully' };
+        } catch (error) {
+          console.error('Failed to resend invites:', error);
+          throw new Error('Failed to resend invites');
+        }
       }),
 
     generateSummary: protectedProcedure

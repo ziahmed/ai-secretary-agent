@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { Calendar, Plus, FileText } from "lucide-react";
+import { Calendar, Plus, FileText, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Meetings() {
@@ -44,6 +44,15 @@ export default function Meetings() {
       utils.actionItems.getByMeeting.invalidate();
       utils.review.getPending.invalidate();
       toast.success("Action items extracted and sent for review");
+    },
+  });
+
+  const resendInvitesMutation = trpc.meetings.resendInvites.useMutation({
+    onSuccess: () => {
+      toast.success("Meeting invites resent to all participants");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to resend invites");
     },
   });
 
@@ -250,7 +259,7 @@ export default function Meetings() {
                       />
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -274,6 +283,17 @@ export default function Meetings() {
                       >
                         Extract Action Items
                       </Button>
+                      {meeting.participants && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => resendInvitesMutation.mutate({ id: meeting.id })}
+                          disabled={resendInvitesMutation.isPending}
+                        >
+                          <Mail className="h-4 w-4 mr-2" />
+                          Resend Invites
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>

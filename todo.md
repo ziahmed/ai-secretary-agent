@@ -94,3 +94,11 @@
 1. Configure email service (Gmail API, SendGrid, AWS SES, or SMTP)
 2. Add email credentials to environment variables
 3. Update emailService.ts with actual email sending implementation
+
+## Enhanced Email Features
+- [x] Integrate Gmail API for actual email sending
+- [x] Add "Resend Invites" button to meeting cards
+- [x] Implement backend procedure for resending invites
+- [x] Create cancellation email template
+- [x] Implement automatic cancellation emails when meeting status changes to cancelled
+- [ ] Test Gmail API email delivery end-to-end (requires GOOGLE_REFRESH_TOKEN)

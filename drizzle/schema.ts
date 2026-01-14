@@ -114,7 +114,7 @@ export const emailLogs = mysqlTable("emailLogs", {
   recipientEmail: varchar("recipientEmail", { length: 320 }).notNull(),
   subject: varchar("subject", { length: 500 }).notNull(),
   body: text("body").notNull(),
-  emailType: mysqlEnum("emailType", ["reminder", "escalation", "meeting_invite", "status_update"]).notNull(),
+  emailType: mysqlEnum("emailType", ["reminder", "escalation", "meeting_invite", "meeting_cancellation", "status_update"]).notNull(),
   relatedTaskId: int("relatedTaskId"),
   relatedMeetingId: int("relatedMeetingId"),
   sentAt: timestamp("sentAt").defaultNow().notNull(),

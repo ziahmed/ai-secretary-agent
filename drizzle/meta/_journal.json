@@ -22,6 +22,13 @@
       "when": 1768359273817,
       "tag": "0002_medical_caretaker",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1768364355103,
+      "tag": "0003_wakeful_diamondback",
+      "breakpoints": true
     }
   ]
 }
