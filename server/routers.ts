@@ -866,6 +866,34 @@ Priority: ${task.priority}`
       };
     }),
   }),
+
+  // ============= Email Tracking =============
+  emails: router({
+    getAll: protectedProcedure.query(async () => {
+      return await db.getAllEmailLogs();
+    }),
+
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getEmailLogById(input.id);
+      }),
+
+    updateStatus: protectedProcedure
+      .input(z.object({
+        trackingId: z.string(),
+        status: z.enum(['delivered', 'opened']),
+      }))
+      .mutation(async ({ input }) => {
+        const timestamp = new Date();
+        if (input.status === 'delivered') {
+          await db.updateEmailLogDeliveryStatus(input.trackingId, timestamp);
+        } else if (input.status === 'opened') {
+          await db.updateEmailLogOpenStatus(input.trackingId, timestamp);
+        }
+        return { success: true };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

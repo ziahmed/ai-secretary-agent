@@ -11,6 +11,8 @@ import Tasks from "./pages/Tasks";
 import ReviewQueue from "./pages/ReviewQueue";
 import GoogleSync from "./pages/GoogleSync";
 import Chat from "./pages/Chat";
+import Calendar from "./pages/Calendar";
+import EmailTracking from "./pages/EmailTracking";
 
 function Router() {
   return (
@@ -21,7 +23,9 @@ function Router() {
       <Route path={"/tasks"} component={Tasks} />
         <Route path="/review" component={ReviewQueue} />
       <Route path="/google-sync" component={GoogleSync} />
-      <Route path={"/chat"} component={Chat} />
+      <Route path="/chat" component={Chat} />
+      <Route path="/calendar" component={Calendar} />
+      <Route path="/email-tracking" component={EmailTracking} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

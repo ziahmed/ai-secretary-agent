@@ -118,7 +118,10 @@ export const emailLogs = mysqlTable("emailLogs", {
   relatedTaskId: int("relatedTaskId"),
   relatedMeetingId: int("relatedMeetingId"),
   sentAt: timestamp("sentAt").defaultNow().notNull(),
-  status: mysqlEnum("status", ["sent", "failed"]).default("sent").notNull(),
+  status: mysqlEnum("status", ["sent", "failed", "delivered", "opened"]).default("sent").notNull(),
+  deliveredAt: timestamp("deliveredAt"),
+  openedAt: timestamp("openedAt"),
+  trackingId: varchar("trackingId", { length: 100 }),
 });
 
 export type EmailLog = typeof emailLogs.$inferSelect;

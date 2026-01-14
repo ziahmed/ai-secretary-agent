@@ -102,3 +102,25 @@
 - [x] Create cancellation email template
 - [x] Implement automatic cancellation emails when meeting status changes to cancelled
 - [ ] Test Gmail API email delivery end-to-end (requires GOOGLE_REFRESH_TOKEN)
+
+## Calendar View
+- [x] Create calendar component with monthly view
+- [x] Add weekly view option
+- [x] Display meetings on calendar dates
+- [x] Display task deadlines on calendar
+- [ ] Add click-to-create meeting from calendar date (future enhancement)
+- [x] Show event details on hover/click
+
+## Email Tracking
+- [x] Add email tracking fields to database schema
+- [x] Implement delivery status tracking
+- [x] Implement read receipt tracking
+- [x] Add tracking UI to show email status
+- [x] Display tracking statistics in dashboard
+
+## UI Enhancements
+- [x] Add loading animations for all async operations
+- [x] Add skeleton loaders for data fetching
+- [x] Add smooth transitions between pages
+- [x] Add loading spinners for button actions
+- [x] Improve overall animation consistency

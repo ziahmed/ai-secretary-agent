@@ -29,6 +29,13 @@
       "when": 1768364355103,
       "tag": "0003_wakeful_diamondback",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1768364899813,
+      "tag": "0004_easy_kingpin",
+      "breakpoints": true
     }
   ]
 }

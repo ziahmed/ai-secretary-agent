@@ -339,3 +339,36 @@ export async function getGmailSyncStateByUser(userId: number) {
   const result = await db.select().from(gmailSyncState).where(eq(gmailSyncState.userId, userId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
+
+// ============= Email Tracking Management =============
+
+export async function getAllEmailLogs() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(emailLogs).orderBy(desc(emailLogs.sentAt));
+}
+
+export async function getEmailLogById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(emailLogs).where(eq(emailLogs.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateEmailLogDeliveryStatus(trackingId: string, deliveredAt: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(emailLogs)
+    .set({ status: 'delivered', deliveredAt })
+    .where(eq(emailLogs.trackingId, trackingId));
+}
+
+export async function updateEmailLogOpenStatus(trackingId: string, openedAt: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(emailLogs)
+    .set({ status: 'opened', openedAt })
+    .where(eq(emailLogs.trackingId, trackingId));
+}
