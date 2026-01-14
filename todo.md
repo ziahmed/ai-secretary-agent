@@ -1,0 +1,60 @@
+# AI Personal Secretary Agent - TODO
+
+## Database Schema
+- [x] Design meetings table with fields for title, description, date, participants, status
+- [x] Design tasks table with fields for title, description, owner, deadline, priority, status
+- [x] Design action_items table linked to meetings with owner, deadline, status
+- [x] Design review_queue table for human-in-the-loop approval workflow
+- [x] Design email_logs table to track sent notifications
+- [x] Design translations table to store translation requests and results
+
+## Backend API Development
+- [x] Create meeting management procedures (create, list, update, delete)
+- [x] Create task tracking procedures (create, list, update, delete, mark complete)
+- [x] Create action item procedures (create, list, update, assign owner)
+- [x] Implement LLM integration for meeting summary generation
+- [x] Implement LLM integration for action item extraction
+- [x] Implement language translation API using LLM
+- [x] Create review queue procedures (submit for review, approve, reject)
+- [ ] Implement Gmail API integration for reading emails
+- [x] Create email notification procedures for reminders and escalations
+- [x] Implement escalation detection logic for overdue tasks
+- [ ] Create calendar scheduling procedures
+
+## Frontend UI Development
+- [x] Build dashboard layout with sidebar navigation
+- [x] Create chatbot interface component with message history
+- [x] Build meetings list and detail pages
+- [x] Build tasks dashboard with filtering and sorting
+- [x] Create action items tracking interface
+- [x] Build review queue interface for human approval
+- [x] Create translation review interface
+- [x] Build task reminder and escalation management UI
+- [x] Implement meeting creation and editing forms
+- [x] Implement task creation and editing forms
+- [ ] Add calendar view for meetings and deadlines
+
+## Integration Features
+- [ ] Gmail OAuth integration setup (requires user credentials)
+- [ ] Email parsing for meeting invites and updates (requires Gmail API)
+- [x] Automated reminder scheduling system
+- [x] Email sending integration for notifications
+- [x] File storage integration for meeting minutes and documents
+
+## Human-in-the-Loop Review System
+- [x] Review workflow for meeting summaries before distribution
+- [x] Review workflow for action items before assignment
+- [x] Review workflow for email communications before sending
+- [x] Review workflow for translated content
+- [x] Approval/rejection interface with edit capabilities
+
+## Testing and Deployment
+- [x] Write vitest tests for all backend procedures
+- [x] Test chatbot Q&A functionality
+- [x] Test meeting management workflow end-to-end
+- [x] Test task tracking and escalation logic
+- [ ] Test Gmail integration (requires user credentials)
+- [x] Test email notification system
+- [x] Test human review workflow
+- [x] Test translation feature
+- [ ] Create final checkpoint for deployment
