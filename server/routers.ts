@@ -6,6 +6,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { storagePut } from "./storage";
 import * as db from "./db";
+import { sendMeetingInvite } from "./emailService";
 
 export const appRouter = router({
   system: systemRouter,
@@ -47,6 +48,33 @@ export const appRouter = router({
           participants: input.participants ? JSON.stringify(input.participants) : null,
           createdBy: ctx.user.id,
         });
+        
+        // Send meeting invites to all participants
+        if (input.participants && input.participants.length > 0) {
+          try {
+            await sendMeetingInvite({
+              to: input.participants,
+              meetingTitle: input.title,
+              meetingDate: input.meetingDate,
+              location: input.location,
+              description: input.description,
+              organizerEmail: ctx.user.email || 'noreply@ai-secretary.com',
+              organizerName: ctx.user.name || 'AI Secretary',
+            });
+            
+            // Log the email send
+            await db.createEmailLog({
+              recipientEmail: input.participants.join(', '),
+              subject: `Meeting Invitation: ${input.title}`,
+              body: `Meeting invite sent for ${input.title} on ${input.meetingDate.toLocaleString()}`,
+              emailType: 'meeting_invite',
+            });
+          } catch (error) {
+            console.error('Failed to send meeting invites:', error);
+            // Don't fail the meeting creation if email sending fails
+          }
+        }
+        
         return meeting;
       }),
 

@@ -82,3 +82,15 @@
 - [x] Add participant management to meeting edit form
 - [x] Display participants list in meeting details
 - [x] Allow adding/removing participants with email validation
+
+## Meeting Invite Emails
+- [x] Create email template for meeting invitations with calendar attachment
+- [x] Implement backend procedure to send invite emails to all participants
+- [x] Trigger invite emails automatically when meeting is created
+- [ ] Add option to resend invites from meeting details page (can be added later)
+- [x] Include meeting details (title, date, time, location, description) in invite
+
+**Note:** Email sending is currently in placeholder mode (logs to console). To enable actual email delivery:
+1. Configure email service (Gmail API, SendGrid, AWS SES, or SMTP)
+2. Add email credentials to environment variables
+3. Update emailService.ts with actual email sending implementation
