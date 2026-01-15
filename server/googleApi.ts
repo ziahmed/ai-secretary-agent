@@ -5,6 +5,7 @@ type OAuth2Client = Auth.OAuth2Client;
 const SCOPES = [
   'https://www.googleapis.com/auth/calendar.readonly',
   'https://www.googleapis.com/auth/gmail.readonly',
+  'https://www.googleapis.com/auth/gmail.send', // Required for sending emails
 ];
 
 let oauth2Client: OAuth2Client | null = null;

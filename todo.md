@@ -136,3 +136,10 @@
 - [x] Test Calendar sync functionality
 - [x] Test Gmail sync functionality
 - [x] Verify email sending works with Gmail API
+
+## Email Sending Bug Fix
+- [x] Investigate why meeting invites are not being sent to attendees (missing gmail.send scope)
+- [x] Update googleApi.ts to include gmail.send scope
+- [ ] User needs to re-authorize with new scope
+- [ ] Test email delivery end-to-end
+- [ ] Verify calendar attachments are included in emails
