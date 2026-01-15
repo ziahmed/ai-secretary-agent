@@ -154,5 +154,13 @@
 
 ## OAuth Endpoint Fix
 - [x] Add /api/google/auth route to server for direct authorization
+- [x] Fix 404 error on /api/google/auth endpoint (works on dev, needs publish)
+- [ ] Publish new checkpoint to make OAuth endpoint available on published app
 - [ ] Verify OAuth flow works on published app
 - [ ] Test re-authorization with new gmail.send scope
+
+## Sign-In Issue on Published App
+- [ ] Investigate why users can't get past sign-in screen
+- [ ] Check if OAuth redirect is working correctly
+- [ ] Verify published app URL configuration
+- [ ] Test authentication flow on published app
