@@ -153,35 +153,6 @@ export default function GoogleSync() {
           </Card>
         )}
 
-        {/* Re-authorize Button */}
-        {syncStatus?.authenticated && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-foreground">Re-authorize Google Account</CardTitle>
-              <CardDescription className="text-foreground">
-                Update permissions or switch to a different Google account
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Alert className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-foreground">
-                  If you need to add new permissions (like gmail.send for email delivery) or switch accounts,
-                  click the button below to restart the authorization process. You'll receive a new refresh token
-                  that needs to be updated in Settings → Secrets.
-                </AlertDescription>
-              </Alert>
-              <Button
-                variant="outline"
-                onClick={handleAuthorize}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Re-authorize with Google
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Sync Actions */}
         {syncStatus?.authenticated && (
           <>

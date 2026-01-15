@@ -1,18 +1,7 @@
 import { Express } from 'express';
-import { getTokensFromCode, getAuthUrl } from './googleApi';
+import { getTokensFromCode } from './googleApi';
 
 export function registerGoogleOAuthRoutes(app: Express) {
-  // Start Google OAuth flow
-  app.get('/api/google/auth', (req, res) => {
-    try {
-      const authUrl = getAuthUrl();
-      res.redirect(authUrl);
-    } catch (error) {
-      console.error('Failed to generate auth URL:', error);
-      res.status(500).send('Failed to start OAuth flow');
-    }
-  });
-
   // Google OAuth callback endpoint
   app.get('/api/google/callback', async (req, res) => {
     const code = req.query.code as string;
