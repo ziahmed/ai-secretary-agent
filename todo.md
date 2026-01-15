@@ -129,3 +129,10 @@
 - [x] Update googleApi.ts to detect and use published URL instead of localhost
 - [x] Test OAuth authorization with published URL
 - [ ] Verify redirect works correctly after authorization (requires user to complete OAuth)
+
+## Google Refresh Token Configuration
+- [x] Add GOOGLE_REFRESH_TOKEN to environment variables
+- [x] Validate token with test
+- [x] Test Calendar sync functionality
+- [x] Test Gmail sync functionality
+- [x] Verify email sending works with Gmail API
