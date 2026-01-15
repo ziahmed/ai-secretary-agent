@@ -143,3 +143,16 @@
 - [ ] User needs to re-authorize with new scope
 - [ ] Test email delivery end-to-end
 - [ ] Verify calendar attachments are included in emails
+
+## Email Delivery Issue
+- [x] Check if user re-authorized with gmail.send scope (NOT re-authorized yet)
+- [x] Debug Gmail API errors in server logs (insufficient permissions)
+- [x] Verify email format is correct for Gmail API (format is correct)
+- [ ] User must re-authorize to get gmail.send permission
+- [ ] Test actual email delivery after re-authorization
+- [ ] Add better error messages when permissions are missing
+
+## OAuth Endpoint Fix
+- [x] Add /api/google/auth route to server for direct authorization
+- [ ] Verify OAuth flow works on published app
+- [ ] Test re-authorization with new gmail.send scope
