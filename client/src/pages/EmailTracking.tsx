@@ -1,11 +1,23 @@
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, CheckCircle, XCircle, Clock, Eye, ArrowLeft } from "lucide-react";
+import { Mail, CheckCircle, XCircle, Clock, Eye, ArrowLeft, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { EmailLog } from "../../../drizzle/schema";
+import { toast } from "sonner";
 
 export default function EmailTracking() {
   const { data: emailLogs, isLoading } = trpc.emails.getAll.useQuery();
+  const utils = trpc.useUtils();
+
+  const deleteEmailMutation = trpc.emails.delete.useMutation({
+    onSuccess: () => {
+      utils.emails.getAll.invalidate();
+      toast.success("Email log deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to delete: ${error.message}`);
+    },
+  });
 
   const stats = emailLogs?.reduce(
     (acc: { total: number; sent: number; delivered: number; opened: number; failed: number }, log: EmailLog) => {
@@ -123,6 +135,7 @@ export default function EmailTracking() {
                     <th className="text-left py-3 px-4 text-black font-semibold">Sent At</th>
                     <th className="text-left py-3 px-4 text-black font-semibold">Delivered At</th>
                     <th className="text-left py-3 px-4 text-black font-semibold">Opened At</th>
+                    <th className="text-left py-3 px-4 text-black font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -158,6 +171,20 @@ export default function EmailTracking() {
                       </td>
                       <td className="py-3 px-4 text-black text-sm">
                         {log.openedAt ? new Date(log.openedAt).toLocaleString() : "-"}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this email log?')) {
+                              deleteEmailMutation.mutate({ id: log.id });
+                            }
+                          }}
+                          disabled={deleteEmailMutation.isPending}
+                        >
+                          <Trash className="h-4 w-4 text-red-600" />
+                        </Button>
                       </td>
                     </tr>
                   ))}

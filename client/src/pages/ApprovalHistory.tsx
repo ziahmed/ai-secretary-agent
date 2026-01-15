@@ -2,11 +2,23 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, CheckCircle, XCircle, Edit2, ArrowLeft } from "lucide-react";
+import { FileText, CheckCircle, XCircle, Edit2, ArrowLeft, Trash } from "lucide-react";
 import { Streamdown } from "streamdown";
+import { toast } from "sonner";
 
 export default function ApprovalHistory() {
   const { data: completedItems, isLoading } = trpc.review.getCompleted.useQuery();
+  const utils = trpc.useUtils();
+
+  const deleteItemMutation = trpc.review.deleteItem.useMutation({
+    onSuccess: () => {
+      utils.review.getCompleted.invalidate();
+      toast.success("Item deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to delete: ${error.message}`);
+    },
+  });
 
   const getTypeLabel = (type: string) => {
     switch (type) {
@@ -94,9 +106,23 @@ export default function ApprovalHistory() {
                           </CardDescription>
                         </div>
                       </div>
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(item.status)}`}>
-                        {item.status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(item.status)}`}>
+                          {item.status}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this item?')) {
+                              deleteItemMutation.mutate({ id: item.id });
+                            }
+                          }}
+                          disabled={deleteItemMutation.isPending}
+                        >
+                          <Trash className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>

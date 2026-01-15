@@ -346,6 +346,12 @@ export async function updateReviewItem(id: number, updates: Partial<InsertReview
   return await getReviewItemById(id);
 }
 
+export async function deleteReviewItem(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(reviewQueue).where(eq(reviewQueue.id, id));
+}
+
 // ============= Email Logs Management =============
 
 export async function createEmailLog(log: InsertEmailLog): Promise<EmailLog> {
@@ -441,4 +447,10 @@ export async function updateEmailLogOpenStatus(trackingId: string, openedAt: Dat
   await db.update(emailLogs)
     .set({ status: 'opened', openedAt })
     .where(eq(emailLogs.trackingId, trackingId));
+}
+
+export async function deleteEmailLog(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(emailLogs).where(eq(emailLogs.id, id));
 }

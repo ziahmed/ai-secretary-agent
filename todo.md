@@ -316,3 +316,16 @@
 - [x] Connect frontend to backend mutation
 - [x] Include review item details in notification
 - [x] Test notification workflow
+
+## Dev Sandbox Sign-in Issue
+- [x] Investigate sign-in error in dev sandbox
+- [x] Check server logs for authentication errors
+- [x] Server is running fine, user is signed in, blank page was temporary loading issue
+
+## Delete Buttons for History Sections
+- [x] Add delete button to approval history items
+- [x] Review queue only shows pending items, completed items are in approval history
+- [x] Add delete button to email tracking items
+- [x] Create backend delete procedures for each section (deleteReviewItem, deleteEmailLog)
+- [x] Add confirmation dialogs before deletion
+- [x] Test delete functionality

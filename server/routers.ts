@@ -819,6 +819,13 @@ Priority: ${task.priority}`
 
         return { success: true, message: `Notification sent to ${input.recipientEmail}` };
       }),
+
+    deleteItem: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteReviewItem(input.id);
+        return { success: true };
+      }),
   }),
 
   // ============= Chat Management =============
@@ -1284,6 +1291,13 @@ Priority: ${task.priority}`
         } else if (input.status === 'opened') {
           await db.updateEmailLogOpenStatus(input.trackingId, timestamp);
         }
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteEmailLog(input.id);
         return { success: true };
       }),
   }),
