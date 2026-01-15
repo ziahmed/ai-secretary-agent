@@ -181,9 +181,14 @@ export async function uploadToGoogleDrive(
     parents: folderId ? [folderId] : undefined,
   };
 
+  // Convert buffer to readable stream for Google Drive API
+  const { Readable } = await import('stream');
+  const buffer = Buffer.isBuffer(fileContent) ? fileContent : Buffer.from(fileContent);
+  const stream = Readable.from(buffer);
+
   const media = {
     mimeType,
-    body: Buffer.isBuffer(fileContent) ? fileContent : Buffer.from(fileContent),
+    body: stream,
   };
 
   const response = await drive.files.create({

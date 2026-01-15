@@ -41,7 +41,12 @@ export default function ReviewQueue() {
 
   const sendEmailMutation = trpc.email.sendApproved.useMutation({
     onSuccess: () => {
-      toast.success("Email sent successfully");
+      utils.review.getPending.invalidate();
+      toast.success("Email sent successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to send email: ${error.message}`);
+      console.error('Email send error:', error);
     },
   });
 

@@ -200,3 +200,15 @@
 - [x] Make meeting invites clickable
 - [x] Add reschedule dialog to calendar meetings
 - [x] Test all calendar features
+
+## Email Sending Fixes
+- [x] Investigate why Task Reminder emails are not being sent (creates drafts in review queue)
+- [x] Investigate why Approval Queue emails are not being sent (sendApproved exists in email router)
+- [x] Add error handling to sendEmailMutation
+- [ ] Test actual email delivery after approval
+- [ ] Verify Gmail API credentials are working
+
+## Transcript Upload Bug Fix
+- [x] Fix "part.body.pipe is not a function" error in transcript upload
+- [x] Update uploadTranscript procedure to handle file data correctly
+- [x] Test transcript upload with sample file (requires Google Drive API enabled)
