@@ -164,3 +164,9 @@
 - [ ] Check if OAuth redirect is working correctly
 - [ ] Verify published app URL configuration
 - [ ] Test authentication flow on published app
+
+## Re-authorize Button
+- [x] Add "Re-authorize Google Account" button to Google Sync page
+- [x] Button should link to /api/google/auth endpoint
+- [x] Test re-authorization flow
+- [x] Update instructions to guide user through token update
