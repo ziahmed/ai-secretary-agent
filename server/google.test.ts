@@ -55,4 +55,15 @@ describe("Google Integration", () => {
     expect(result.url).toContain("accounts.google.com");
     expect(result.url).toContain("oauth2");
   });
+
+  it("should verify Google refresh token is authenticated", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const status = await caller.google.getSyncStatus();
+
+    expect(status).toBeDefined();
+    expect(status.authenticated).toBe(true);
+    expect(status.accountEmail).toBe("secretary.omega2@gmail.com");
+  });
 });

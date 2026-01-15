@@ -131,3 +131,9 @@
 - [x] Ensure button links to correct OAuth endpoint
 - [x] Test re-authorization flow end-to-end
 - [x] Verify new refresh token can be obtained
+
+## Add gmail.send Scope for Email Delivery
+- [x] Add gmail.send scope to SCOPES array in googleApi.ts
+- [ ] Guide user to re-authorize with new scope
+- [ ] Update GOOGLE_REFRESH_TOKEN with new token
+- [ ] Test email delivery to verify emails are actually sent
