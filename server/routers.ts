@@ -165,7 +165,7 @@ export const appRouter = router({
                   organizerEmail: ctx.user.email || 'noreply@ai-secretary.com',
                   organizerName: ctx.user.name || 'AI Secretary',
                 },
-                cancellationReason
+                cancellationReason || 'Meeting cancelled'
               );
               
               // Log the email send
@@ -351,6 +351,44 @@ export const appRouter = router({
         });
 
         return { actionItems: createdItems };
+      }),
+
+    uploadTranscript: protectedProcedure
+      .input(z.object({
+        meetingId: z.number(),
+        fileName: z.string(),
+        fileContent: z.string(), // Base64 encoded file content
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const meeting = await db.getMeetingById(input.meetingId);
+        if (!meeting) {
+          throw new Error('Meeting not found');
+        }
+
+        // Upload to Google Drive
+        const { uploadToGoogleDrive } = await import('./googleApi');
+        const fileBuffer = Buffer.from(input.fileContent, 'base64');
+        const folderPath = `Meeting Transcripts/${meeting.title}`;
+        
+        const { fileId, webViewLink } = await uploadToGoogleDrive(
+          input.fileName,
+          fileBuffer,
+          input.mimeType,
+          folderPath
+        );
+
+        // Update meeting with transcript URL
+        await db.updateMeeting(input.meetingId, {
+          transcriptUrl: webViewLink,
+        });
+
+        return {
+          success: true,
+          fileId,
+          webViewLink,
+          message: 'Transcript uploaded successfully to Google Drive',
+        };
       }),
   }),
 
@@ -689,9 +727,9 @@ Priority: ${task.priority}`
       .input(z.object({
         reviewId: z.number(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const reviewItem = await db.getReviewItemById(input.reviewId);
-        if (!reviewItem || reviewItem.status !== "approved") {
+        if (!reviewItem || reviewItem.status !== "approved" && reviewItem.status !== "edited") {
           throw new Error("Review item not found or not approved");
         }
 
@@ -702,17 +740,37 @@ Priority: ${task.priority}`
           throw new Error("No recipient email found");
         }
 
-        // In a real implementation, this would send the email via Gmail API or SMTP
-        // For now, we'll just log it
-        await db.createEmailLog({
-          recipientEmail,
-          subject: metadata.isEscalation ? "Task Escalation Notice" : "Task Reminder",
-          body: reviewItem.content,
-          emailType: metadata.isEscalation ? "escalation" : "reminder",
-          relatedTaskId: metadata.taskId,
-        });
+        // Get approver email (the user who approved/edited the review item)
+        const approverEmail = ctx.user.email;
+        
+        // Send email via Gmail API with CC to approver
+        const { sendEmailWithCC } = await import('./emailService');
+        const subject = metadata.isEscalation ? "Task Escalation Notice" : "Task Reminder";
+        
+        try {
+          await sendEmailWithCC({
+            to: [recipientEmail],
+            cc: approverEmail ? [approverEmail] : [],
+            subject,
+            htmlContent: reviewItem.content,
+            fromEmail: process.env.GOOGLE_ACCOUNT_EMAIL || 'secretary.omega2@gmail.com',
+            fromName: 'AI Personal Secretary'
+          });
 
-        return { success: true, message: "Email sent successfully" };
+          // Log the email
+          await db.createEmailLog({
+            recipientEmail,
+            subject,
+            body: reviewItem.content,
+            emailType: metadata.isEscalation ? "escalation" : "reminder",
+            relatedTaskId: metadata.taskId,
+          });
+
+          return { success: true, message: "Email sent successfully with CC to approver" };
+        } catch (error) {
+          console.error('Failed to send approved email:', error);
+          throw new Error("Failed to send email");
+        }
       }),
   }),
 

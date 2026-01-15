@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { Calendar, Plus, FileText, Mail, ArrowLeft, X, CalendarClock } from "lucide-react";
+import { Calendar, Plus, FileText, Mail, ArrowLeft, X, CalendarClock, Upload, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Meetings() {
@@ -60,6 +60,41 @@ export default function Meetings() {
       toast.error(error.message || "Failed to resend invites");
     },
   });
+  
+  const uploadTranscriptMutation = trpc.meetings.uploadTranscript.useMutation({
+    onSuccess: () => {
+      utils.meetings.list.invalidate();
+      toast.success("Transcript uploaded to Google Drive successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to upload transcript");
+    },
+  });
+  
+  const handleUploadTranscript = (meetingId: number) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.txt,.doc,.docx,.pdf';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64Content = event.target?.result as string;
+        const base64Data = base64Content.split(',')[1];
+        
+        uploadTranscriptMutation.mutate({
+          meetingId,
+          fileName: file.name,
+          fileContent: base64Data,
+          mimeType: file.type || 'text/plain',
+        });
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
   
   const updateMeetingMutation = trpc.meetings.update.useMutation({
     onSuccess: () => {
@@ -298,6 +333,20 @@ export default function Meetings() {
                       <p className="text-sm text-foreground">{meeting.summaryText}</p>
                     </div>
                   )}
+                  
+                  {meeting.transcriptUrl && (
+                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm font-medium text-green-800 mb-1">Transcript Available</p>
+                      <a 
+                        href={meeting.transcriptUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm text-green-600 hover:text-green-700 flex items-center gap-1"
+                      >
+                        View in Google Drive <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                  )}
 
                   <div className="space-y-3">
                     <div>
@@ -315,6 +364,15 @@ export default function Meetings() {
                     </div>
                     
                     <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleUploadTranscript(meeting.id)}
+                        disabled={uploadTranscriptMutation.isPending}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Transcript
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

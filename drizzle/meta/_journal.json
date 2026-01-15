@@ -36,6 +36,13 @@
       "when": 1768364899813,
       "tag": "0004_easy_kingpin",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1768488597021,
+      "tag": "0005_secret_hannibal_king",
+      "breakpoints": true
     }
   ]
 }

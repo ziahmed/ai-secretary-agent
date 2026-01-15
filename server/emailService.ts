@@ -193,7 +193,8 @@ function createEmailMessage(
   htmlContent: string,
   icsContent: string,
   fromEmail: string,
-  fromName: string
+  fromName: string,
+  cc?: string[]
 ): string {
   const boundary = `boundary_${Date.now()}`;
   const icsBase64 = Buffer.from(icsContent).toString('base64');
@@ -201,6 +202,7 @@ function createEmailMessage(
   const message = [
     `From: ${fromName} <${fromEmail}>`,
     `To: ${to.join(', ')}`,
+    ...(cc && cc.length > 0 ? [`Cc: ${cc.join(', ')}`] : []),
     `Subject: ${subject}`,
     'MIME-Version: 1.0',
     `Content-Type: multipart/mixed; boundary="${boundary}"`,
@@ -381,9 +383,66 @@ export async function sendMeetingUpdate(invite: MeetingInvite, changes: string):
 }
 
 /**
+ * Send email with CC support using Gmail API
+ */
+export interface EmailWithCC {
+  to: string[];
+  cc?: string[];
+  subject: string;
+  htmlContent: string;
+  fromEmail: string;
+  fromName: string;
+}
+
+export async function sendEmailWithCC(email: EmailWithCC): Promise<boolean> {
+  try {
+    // Check if Gmail API credentials are configured
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_REFRESH_TOKEN) {
+      console.log('=== EMAIL WITH CC (Gmail API not configured) ===');
+      console.log('To:', email.to.join(', '));
+      console.log('CC:', email.cc?.join(', ') || 'None');
+      console.log('Subject:', email.subject);
+      console.log('Note: Configure Gmail API credentials to enable actual email sending');
+      console.log('===========================');
+      return true;
+    }
+    
+    // Send email using Gmail API
+    const gmail = getGmailClient();
+    
+    const boundary = `boundary_${Date.now()}`;
+    const message = [
+      `From: ${email.fromName} <${email.fromEmail}>`,
+      `To: ${email.to.join(', ')}`,
+      ...(email.cc && email.cc.length > 0 ? [`Cc: ${email.cc.join(', ')}`] : []),
+      `Subject: ${email.subject}`,
+      'MIME-Version: 1.0',
+      `Content-Type: text/html; charset=UTF-8`,
+      '',
+      email.htmlContent,
+    ].join('\r\n');
+
+    const raw = Buffer.from(message).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+    await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw,
+      },
+    });
+    
+    console.log('✅ Email with CC sent via Gmail API to:', email.to.join(', '), 'CC:', email.cc?.join(', ') || 'None');
+    return true;
+  } catch (error) {
+    console.error('Failed to send email with CC via Gmail API:', error);
+    return false;
+  }
+}
+
+/**
  * Send meeting cancellation notification to participants using Gmail API
  */
-export async function sendMeetingCancellation(invite: MeetingInvite, reason?: string): Promise<boolean> {
+export async function sendMeetingCancellation(invite: MeetingInvite, reason: string): Promise<boolean> {
   try {
     const htmlContent = `
 <!DOCTYPE html>

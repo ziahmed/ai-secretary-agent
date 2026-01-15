@@ -155,3 +155,19 @@
 - [x] Add back button to GoogleSync page
 - [x] Add back button to ReviewQueue page
 - [x] Test navigation flow with back buttons
+
+## Owner-Only Access & Enhanced Features
+- [x] Hide Google Sync navigation for non-owner users
+- [x] Hide Email Tracking navigation for non-owner users
+- [x] Make dashboard cards clickable to navigate to sections
+- [x] Add CC functionality to send approved emails to organizer with approver in CC
+- [x] Add Google Drive API scope (drive.file) to googleApi.ts
+- [x] Create uploadToGoogleDrive function in googleApi.ts
+- [x] Add transcript upload endpoint in routers.ts
+- [x] Add transcriptUrl field to meetings table schema
+- [x] Push database schema changes
+- [x] Add upload transcript UI to meeting detail page
+- [x] Test transcript upload and Google Drive storage
+- [ ] Test owner-only access controls
+- [ ] Test dashboard navigation
+- [ ] Test email CC functionality

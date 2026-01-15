@@ -6,6 +6,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/calendar.readonly',
   'https://www.googleapis.com/auth/gmail.readonly',
   'https://www.googleapis.com/auth/gmail.send',
+  'https://www.googleapis.com/auth/drive.file', // Access to files created by the app
 ];
 
 let oauth2Client: OAuth2Client | null = null;
@@ -116,5 +117,83 @@ export async function parseEmailForMeetingInfo(messageId: string) {
     date,
     body,
     snippet: message.snippet || '',
+  };
+}
+
+/**
+ * Upload a file to Google Drive
+ * @param fileName Name of the file
+ * @param fileContent File content as Buffer or string
+ * @param mimeType MIME type of the file
+ * @param folderPath Optional folder path (e.g., "Meeting Transcripts/Meeting Title")
+ * @returns Google Drive file ID and web view link
+ */
+export async function uploadToGoogleDrive(
+  fileName: string,
+  fileContent: Buffer | string,
+  mimeType: string,
+  folderPath?: string
+): Promise<{ fileId: string; webViewLink: string }> {
+  const client = getOAuth2Client();
+  const drive = google.drive({ version: 'v3', auth: client });
+
+  let folderId: string | undefined;
+
+  // Create folder structure if folderPath is provided
+  if (folderPath) {
+    const folders = folderPath.split('/').filter(f => f.trim());
+    let parentId: string | undefined;
+
+    for (const folderName of folders) {
+      // Check if folder exists
+      const searchResponse = await drive.files.list({
+        q: `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false${parentId ? ` and '${parentId}' in parents` : ''}`,
+        fields: 'files(id, name)',
+        spaces: 'drive',
+      });
+
+      if (searchResponse.data.files && searchResponse.data.files.length > 0) {
+        // Folder exists
+        parentId = searchResponse.data.files[0].id!;
+      } else {
+        // Create folder
+        const folderMetadata = {
+          name: folderName,
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: parentId ? [parentId] : undefined,
+        };
+
+        const folderResponse = await drive.files.create({
+          requestBody: folderMetadata,
+          fields: 'id',
+        });
+
+        parentId = folderResponse.data.id!;
+      }
+    }
+
+    folderId = parentId;
+  }
+
+  // Upload file
+  const fileMetadata = {
+    name: fileName,
+    parents: folderId ? [folderId] : undefined,
+  };
+
+  const media = {
+    mimeType,
+    body: Buffer.isBuffer(fileContent) ? fileContent : Buffer.from(fileContent),
+  };
+
+  const response = await drive.files.create({
+    requestBody: fileMetadata,
+    media,
+    fields: 'id, webViewLink',
+  });
+
+  return {
+    fileId: response.data.id!,
+    webViewLink: response.data.webViewLink!,
   };
 }

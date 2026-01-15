@@ -2,10 +2,11 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CheckSquare, AlertCircle, Clock } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
   const { data: tasks, isLoading: tasksLoading } = trpc.tasks.list.useQuery();
   const { data: meetings, isLoading: meetingsLoading } = trpc.meetings.list.useQuery();
   const { data: overdueTasks } = trpc.tasks.getOverdue.useQuery();
@@ -23,7 +24,10 @@ export default function Dashboard() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card 
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => setLocation('/tasks')}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-foreground">Open Tasks</CardTitle>
               <CheckSquare className="h-4 w-4 text-muted-foreground" />
@@ -36,7 +40,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card 
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => setLocation('/tasks')}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-foreground">Overdue Tasks</CardTitle>
               <AlertCircle className="h-4 w-4 text-destructive" />
@@ -49,7 +56,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card 
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => setLocation('/meetings')}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-foreground">Upcoming Meetings</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -62,7 +72,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card 
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => setLocation('/review')}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-foreground">Pending Reviews</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />

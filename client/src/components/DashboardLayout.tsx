@@ -27,16 +27,22 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-const menuItems = [
+const allMenuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: MessageSquare, label: "AI Chat", path: "/chat" },
   { icon: Calendar, label: "Meetings", path: "/meetings" },
   { icon: CheckSquare, label: "Tasks", path: "/tasks" },
   { icon: Calendar, label: "Calendar View", path: "/calendar" },
   { icon: FileText, label: "Review Queue", path: "/review" },
-  { icon: MailCheck, label: "Email Tracking", path: "/email-tracking" },
-  { icon: Cloud, label: "Google Sync", path: "/google-sync" },
+  { icon: MailCheck, label: "Email Tracking", path: "/email-tracking", ownerOnly: true },
+  { icon: Cloud, label: "Google Sync", path: "/google-sync", ownerOnly: true },
 ];
+
+const getMenuItems = (userEmail: string | null) => {
+  const ownerEmail = "secretary.omega2@gmail.com";
+  const isOwner = userEmail === ownerEmail;
+  return allMenuItems.filter(item => !item.ownerOnly || isOwner);
+};
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
 const DEFAULT_WIDTH = 280;
@@ -53,6 +59,7 @@ export default function DashboardLayout({
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
   const { loading, user } = useAuth();
+  const menuItems = getMenuItems(user?.email || null);
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
@@ -96,7 +103,7 @@ export default function DashboardLayout({
         } as CSSProperties
       }
     >
-      <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
+      <DashboardLayoutContent setSidebarWidth={setSidebarWidth} menuItems={menuItems}>
         {children}
       </DashboardLayoutContent>
     </SidebarProvider>
@@ -106,11 +113,13 @@ export default function DashboardLayout({
 type DashboardLayoutContentProps = {
   children: React.ReactNode;
   setSidebarWidth: (width: number) => void;
+  menuItems: Array<{ icon: any; label: string; path: string; ownerOnly?: boolean }>;
 };
 
 function DashboardLayoutContent({
   children,
   setSidebarWidth,
+  menuItems,
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
