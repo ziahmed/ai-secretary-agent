@@ -28,6 +28,7 @@ export const meetings = mysqlTable("meetings", {
   meetingDate: timestamp("meetingDate").notNull(),
   duration: int("duration"), // in minutes
   location: varchar("location", { length: 255 }),
+  meetLink: text("meetLink"), // Google Meet or other video conference link
   participants: text("participants"), // JSON array of participant emails
   status: mysqlEnum("status", ["scheduled", "completed", "cancelled"]).default("scheduled").notNull(),
   minutesUrl: text("minutesUrl"), // S3 URL to meeting minutes document

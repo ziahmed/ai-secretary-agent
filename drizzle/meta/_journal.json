@@ -43,6 +43,13 @@
       "when": 1768488597021,
       "tag": "0005_secret_hannibal_king",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1768497923875,
+      "tag": "0006_faulty_crystal",
+      "breakpoints": true
     }
   ]
 }

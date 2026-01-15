@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { Calendar, Plus, FileText, Mail, ArrowLeft, X, CalendarClock, Upload, ExternalLink } from "lucide-react";
+import { Calendar, Plus, FileText, Mail, ArrowLeft, X, CalendarClock, Upload, ExternalLink, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Meetings() {
@@ -17,11 +17,15 @@ export default function Meetings() {
   const [meetingDate, setMeetingDate] = useState("");
   const [location, setLocation] = useState("");
   const [participants, setParticipants] = useState("");
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+  const [manualEmail, setManualEmail] = useState("");
   const [transcript, setTranscript] = useState("");
   const [selectedMeetingId, setSelectedMeetingId] = useState<number | null>(null);
+  const [collapsedMeetings, setCollapsedMeetings] = useState<Set<number>>(new Set());
 
   const utils = trpc.useUtils();
   const { data: meetingsData, isLoading } = trpc.meetings.list.useQuery();
+  const { data: users } = trpc.users.list.useQuery();
   
   // Sort meetings by date (latest first)
   const meetings = meetingsData?.slice().sort((a, b) => 
@@ -104,6 +108,16 @@ export default function Meetings() {
     input.click();
   };
   
+  const deleteMeetingMutation = trpc.meetings.delete.useMutation({
+    onSuccess: () => {
+      utils.meetings.list.invalidate();
+      toast.success("Meeting deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete meeting");
+    },
+  });
+
   const updateMeetingMutation = trpc.meetings.update.useMutation({
     onSuccess: (data: any) => {
       utils.meetings.list.invalidate();
@@ -157,6 +171,8 @@ export default function Meetings() {
     setMeetingDate("");
     setLocation("");
     setParticipants("");
+    setSelectedParticipants([]);
+    setManualEmail("");
     setTranscript("");
   };
 
@@ -166,17 +182,12 @@ export default function Meetings() {
       return;
     }
 
-    const participantsList = participants
-      .split(',')
-      .map(p => p.trim())
-      .filter(p => p.length > 0);
-
     createMutation.mutate({
       title,
       description,
       meetingDate: new Date(meetingDate),
       location,
-      participants: participantsList.length > 0 ? participantsList : undefined,
+      participants: selectedParticipants.length > 0 ? selectedParticipants : undefined,
     });
   };
 
@@ -267,16 +278,70 @@ export default function Meetings() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="participants" className="text-foreground">Participants</Label>
-                  <Input
-                    id="participants"
-                    value={participants}
-                    onChange={(e) => setParticipants(e.target.value)}
-                    placeholder="email1@example.com, email2@example.com"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Enter email addresses separated by commas
-                  </p>
+                  <Label className="text-foreground">Participants</Label>
+                  <div className="space-y-2">
+                    <select
+                      className="w-full px-3 py-2 border rounded-md text-sm"
+                      value=""
+                      onChange={(e) => {
+                        const email = e.target.value;
+                        if (email && !selectedParticipants.includes(email)) {
+                          setSelectedParticipants([...selectedParticipants, email]);
+                        }
+                      }}
+                    >
+                      <option value="">-- Select registered user --</option>
+                      {users?.map(user => (
+                        <option key={user.id} value={user.email || ''}>
+                          {user.name || user.email}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="flex gap-2">
+                      <Input
+                        value={manualEmail}
+                        onChange={(e) => setManualEmail(e.target.value)}
+                        placeholder="Or enter email manually"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && manualEmail && !selectedParticipants.includes(manualEmail)) {
+                            e.preventDefault();
+                            setSelectedParticipants([...selectedParticipants, manualEmail]);
+                            setManualEmail("");
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          if (manualEmail && !selectedParticipants.includes(manualEmail)) {
+                            setSelectedParticipants([...selectedParticipants, manualEmail]);
+                            setManualEmail("");
+                          }
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {selectedParticipants.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {selectedParticipants.map((email, idx) => (
+                          <span key={idx} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full flex items-center gap-1">
+                            {email}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedParticipants(selectedParticipants.filter((_, i) => i !== idx));
+                              }}
+                              className="hover:text-blue-900"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <DialogFooter>
@@ -310,21 +375,54 @@ export default function Meetings() {
               <Card key={meeting.id}>
                 <CardHeader>
                   <div className="flex justify-between items-start">
-                    <div>
+                    <div className="flex-1">
                       <CardTitle className="text-foreground">{meeting.title}</CardTitle>
                       <CardDescription className="text-foreground">
                         {new Date(meeting.meetingDate).toLocaleString()} • {meeting.location || 'No location'}
                       </CardDescription>
+                      {meeting.minutesUrl && (
+                        <a 
+                          href={meeting.minutesUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-2"
+                        >
+                          <FileText className="h-3 w-3" />
+                          View Summary in Google Drive <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
                     </div>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      meeting.status === 'completed' ? 'bg-green-100 text-green-800' :
-                      meeting.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
-                      {meeting.status}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        meeting.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        meeting.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {meeting.status}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedMeetings);
+                          if (newCollapsed.has(meeting.id)) {
+                            newCollapsed.delete(meeting.id);
+                          } else {
+                            newCollapsed.add(meeting.id);
+                          }
+                          setCollapsedMeetings(newCollapsed);
+                        }}
+                      >
+                        {collapsedMeetings.has(meeting.id) ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronUp className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
+                {!collapsedMeetings.has(meeting.id) && (
                 <CardContent>
                   {meeting.description && (
                     <p className="text-foreground mb-4">{meeting.description}</p>
@@ -363,6 +461,20 @@ export default function Meetings() {
                       </a>
                     </div>
                   )}
+                  
+                  {meeting.meetLink && (
+                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm font-medium text-blue-800 mb-2">Video Conference</p>
+                      <a 
+                        href={meeting.meetLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                      >
+                        🎥 Join Google Meet
+                      </a>
+                    </div>
+                  )}
 
                   <div className="space-y-3">
                     <div>
@@ -394,9 +506,10 @@ export default function Meetings() {
                         size="sm"
                         onClick={() => {
                           setSelectedMeetingId(meeting.id);
-                          handleGenerateSummary(meeting.id);
+                          // Call without transcript parameter - backend will fetch from Google Drive
+                          generateSummaryMutation.mutate({ meetingId: meeting.id });
                         }}
-                        disabled={generateSummaryMutation.isPending || !transcript}
+                        disabled={generateSummaryMutation.isPending || !meeting.transcriptUrl}
                       >
                         <FileText className="h-4 w-4 mr-2" />
                         Generate Summary
@@ -406,9 +519,10 @@ export default function Meetings() {
                         size="sm"
                         onClick={() => {
                           setSelectedMeetingId(meeting.id);
-                          handleExtractActionItems(meeting.id);
+                          // Call without transcript parameter - backend will fetch from Google Drive
+                          extractActionItemsMutation.mutate({ meetingId: meeting.id });
                         }}
-                        disabled={extractActionItemsMutation.isPending || !transcript}
+                        disabled={extractActionItemsMutation.isPending || !meeting.transcriptUrl}
                       >
                         Extract Action Items
                       </Button>
@@ -446,9 +560,24 @@ export default function Meetings() {
                           </Button>
                         </>
                       )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to permanently delete "${meeting.title}"? This action cannot be undone.`)) {
+                            deleteMeetingMutation.mutate({ id: meeting.id });
+                          }
+                        }}
+                        disabled={deleteMeetingMutation.isPending}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
+                )}
               </Card>
             ))}
           </div>

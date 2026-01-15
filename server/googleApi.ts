@@ -202,3 +202,31 @@ export async function uploadToGoogleDrive(
     webViewLink: response.data.webViewLink!,
   };
 }
+
+/**
+ * Download a file from Google Drive by extracting file ID from web view link
+ * @param webViewLink Google Drive web view link (e.g., https://drive.google.com/file/d/FILE_ID/view)
+ * @returns File content as string
+ */
+export async function downloadFromGoogleDrive(webViewLink: string): Promise<string> {
+  // Extract file ID from web view link
+  const fileIdMatch = webViewLink.match(/\/d\/([^\/]+)/);
+  if (!fileIdMatch) {
+    throw new Error('Invalid Google Drive link format');
+  }
+  const fileId = fileIdMatch[1];
+
+  const client = getOAuth2Client();
+  const drive = google.drive({ version: 'v3', auth: client });
+
+  // Download file content
+  const response = await drive.files.get(
+    {
+      fileId,
+      alt: 'media',
+    },
+    { responseType: 'text' }
+  );
+
+  return response.data as string;
+}

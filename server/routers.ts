@@ -21,6 +21,13 @@ export const appRouter = router({
     }),
   }),
 
+  // ============= User Management =============
+  users: router({
+    list: protectedProcedure.query(async () => {
+      return await db.getAllUsers();
+    }),
+  }),
+
   // ============= Meeting Management =============
   meetings: router({
     list: protectedProcedure.query(async ({ ctx }) => {
@@ -49,8 +56,13 @@ export const appRouter = router({
           input.duration || 60
         );
         
+        // Generate a unique Google Meet-style link
+        const meetingCode = Math.random().toString(36).substring(2, 12);
+        const meetLink = `https://meet.google.com/${meetingCode}`;
+        
         const meeting = await db.createMeeting({
           ...input,
+          meetLink,
           participants: input.participants ? JSON.stringify(input.participants) : null,
           createdBy: ctx.user.id,
         });
@@ -63,6 +75,7 @@ export const appRouter = router({
               meetingTitle: input.title,
               meetingDate: input.meetingDate,
               location: input.location,
+              meetLink,
               description: input.description,
               organizerEmail: ctx.user.email || 'noreply@ai-secretary.com',
               organizerName: ctx.user.name || 'AI Secretary',
@@ -255,19 +268,61 @@ export const appRouter = router({
     generateSummary: protectedProcedure
       .input(z.object({
         meetingId: z.number(),
-        transcript: z.string(),
+        transcript: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
+        const meeting = await db.getMeetingById(input.meetingId);
+        if (!meeting) {
+          throw new Error('Meeting not found');
+        }
+
+        // Get transcript from input or fetch from Google Drive
+        let transcript = input.transcript;
+        if (!transcript) {
+          if (!meeting.transcriptUrl) {
+            throw new Error('No transcript available for this meeting');
+          }
+          const { downloadFromGoogleDrive } = await import('./googleApi');
+          transcript = await downloadFromGoogleDrive(meeting.transcriptUrl);
+        }
+
         // Generate meeting summary using LLM
         const response = await invokeLLM({
           messages: [
             {
               role: "system",
-              content: "You are an AI secretary assistant. Generate a concise, professional meeting summary with key discussion points, decisions made, and next steps."
+              content: "You are an AI secretary assistant. Generate a well-formatted, professional meeting summary that is easy to read and understand. Use clear headings, bullet points, and proper spacing."
             },
             {
               role: "user",
-              content: `Please summarize the following meeting transcript:\n\n${input.transcript}`
+              content: `Please create a comprehensive, well-formatted summary of this meeting transcript.
+
+Format the summary with clear sections:
+
+# MEETING SUMMARY
+
+## Meeting Overview
+[Brief overview of the meeting purpose and context]
+
+## Attendees
+[List of participants]
+
+## Key Discussion Points
+[Main topics discussed with bullet points]
+
+## Decisions Made
+[Important decisions with bullet points]
+
+## Action Items
+[List of action items with owners and deadlines]
+
+## Next Steps
+[What happens next]
+
+---
+
+Transcript:
+${transcript}`
             }
           ]
         });
@@ -276,14 +331,21 @@ export const appRouter = router({
           ? response.choices[0]?.message?.content
           : "");
 
-        // Save summary to S3
-        const summaryKey = `meetings/${input.meetingId}/summary-${Date.now()}.txt`;
-        const { url } = await storagePut(summaryKey, summary, "text/plain");
+        // Upload summary to Google Drive in same folder as transcript
+        const { uploadToGoogleDrive } = await import('./googleApi');
+        const summaryFileName = `${meeting.title} - Summary.md`;
+        const folderPath = `Meeting Transcripts/${meeting.title}`;
+        
+        const { fileId, webViewLink } = await uploadToGoogleDrive(
+          summaryFileName,
+          summary,
+          'text/plain',
+          folderPath
+        );
 
-        // Update meeting with summary
+        // Update meeting with Google Drive link only (summary stored in Google Drive)
         await db.updateMeeting(input.meetingId, {
-          summaryText: summary,
-          minutesUrl: url,
+          minutesUrl: webViewLink,
         });
 
         // Create review item for human approval
@@ -294,25 +356,59 @@ export const appRouter = router({
           createdBy: ctx.user.id,
         });
 
-        return { summary, url };
+        return { summary, url: webViewLink, fileId, webViewLink };
       }),
 
     extractActionItems: protectedProcedure
       .input(z.object({
         meetingId: z.number(),
-        transcript: z.string(),
+        transcript: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
+        // Get transcript from input or fetch from Google Drive
+        let transcript = input.transcript;
+        
+        if (!transcript) {
+          const meeting = await db.getMeetingById(input.meetingId);
+          if (!meeting) {
+            throw new Error('Meeting not found');
+          }
+          
+          if (!meeting.transcriptUrl) {
+            throw new Error('No transcript available for this meeting. Please upload a transcript first.');
+          }
+          
+          // Download transcript from Google Drive
+          const { downloadFromGoogleDrive } = await import('./googleApi');
+          transcript = await downloadFromGoogleDrive(meeting.transcriptUrl);
+        }
         // Extract action items using LLM with structured output
         const response = await invokeLLM({
           messages: [
             {
               role: "system",
-              content: "You are an AI secretary assistant. Extract action items from meeting transcripts."
+              content: "You are an AI secretary assistant specialized in extracting action items from meeting transcripts. Each action item should be a SEPARATE entry in the array. Do not combine multiple action items into one description."
             },
             {
               role: "user",
-              content: `Extract all action items from this meeting transcript. For each action item, identify: description, owner (if mentioned), and deadline (if mentioned).\n\nTranscript:\n${input.transcript}`
+              content: `Extract all action items from this meeting transcript. Create a SEPARATE item for each distinct action or task mentioned.
+
+For each action item, provide:
+- description: A clear, concise description of the specific task (one task per item)
+- owner: The person responsible (use their name if mentioned, otherwise "Not specified")
+- deadline: The due date if mentioned (use format like "end of week", "next week", "February 1st", or "Not specified")
+
+IMPORTANT: If the transcript mentions multiple action items (e.g., "1. Do X, 2. Do Y, 3. Do Z"), create a SEPARATE entry for each one. Do not combine them into a single description.
+
+Example of CORRECT extraction:
+[
+  {"description": "Set up load testing environment", "owner": "Xael", "deadline": "next week"},
+  {"description": "Continue hiring process for additional engineers", "owner": "CS Chua", "deadline": "Not specified"},
+  {"description": "Coordinate customer advisory board meeting", "owner": "Steven and Gaylin", "deadline": "late February"}
+]
+
+Transcript:
+${transcript}`
             }
           ],
           response_format: {
@@ -353,21 +449,40 @@ export const appRouter = router({
         // Create action items in database
         const createdItems = [];
         for (const item of actionItemsData) {
+          // Safely parse deadline - only create Date if it's a valid date string
+          let deadline: Date | null = null;
+          if (item.deadline && item.deadline !== "Not specified" && item.deadline.toLowerCase() !== "none") {
+            try {
+              const parsedDate = new Date(item.deadline);
+              if (!isNaN(parsedDate.getTime())) {
+                deadline = parsedDate;
+              }
+            } catch (e) {
+              // Invalid date format, leave as null
+              console.warn(`Could not parse deadline: ${item.deadline}`);
+            }
+          }
+          
           const actionItem = await db.createActionItem({
             meetingId: input.meetingId,
             description: item.description,
-            ownerEmail: item.owner !== "Not specified" ? item.owner : null,
-            deadline: item.deadline !== "Not specified" ? new Date(item.deadline) : null,
+            ownerEmail: item.owner !== "Not specified" && item.owner.toLowerCase() !== "none" ? item.owner : null,
+            deadline,
           });
           createdItems.push(actionItem);
         }
 
         // Create review item for human approval
+        const meeting = await db.getMeetingById(input.meetingId);
         await db.createReviewItem({
           type: "action_items",
           referenceId: input.meetingId,
           content: JSON.stringify(createdItems),
           createdBy: ctx.user.id,
+          metadata: JSON.stringify({
+            meetingTitle: meeting?.title || "Unknown Meeting",
+            meetingId: input.meetingId,
+          }),
         });
 
         return { actionItems: createdItems };
@@ -604,6 +719,9 @@ Priority: ${task.priority}`
         editedContent: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
+        const reviewItem = await db.getReviewItemById(input.id);
+        if (!reviewItem) throw new Error("Review item not found");
+        
         const updates: any = {
           status: input.editedContent ? "edited" : "approved",
           reviewedBy: ctx.user.id,
@@ -612,6 +730,40 @@ Priority: ${task.priority}`
         
         if (input.editedContent) {
           updates.content = input.editedContent;
+        }
+
+        // If this is action items, create tasks for registered users
+        if (reviewItem.type === "action_items") {
+          try {
+            const actionItems = JSON.parse(input.editedContent || reviewItem.content);
+            for (const actionItem of actionItems) {
+              // Only create task if assigned to a registered user (has ownerId)
+              if (actionItem.ownerId) {
+                const task = await db.createTask({
+                  title: actionItem.description,
+                  description: actionItem.description,
+                  ownerId: actionItem.ownerId,
+                  ownerEmail: actionItem.ownerEmail,
+                  deadline: actionItem.deadline ? new Date(actionItem.deadline) : undefined,
+                  priority: "medium",
+                  status: "open",
+                  meetingId: reviewItem.referenceId,
+                  createdBy: ctx.user.id,
+                });
+                
+                // Update action item with taskId
+                if (actionItem.id) {
+                  await db.updateActionItem(actionItem.id, { 
+                    taskId: task.id,
+                    status: "assigned",
+                    ownerId: actionItem.ownerId,
+                  });
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Failed to create tasks from action items:", error);
+          }
         }
 
         return await db.updateReviewItem(input.id, updates);

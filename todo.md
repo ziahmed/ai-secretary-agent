@@ -212,3 +212,88 @@
 - [x] Fix "part.body.pipe is not a function" error in transcript upload
 - [x] Update uploadTranscript procedure to handle file data correctly
 - [x] Test transcript upload with sample file (requires Google Drive API enabled)
+
+## Action Item Extraction Bug
+- [x] Investigate why "Extract Action Items" button is disabled
+- [x] Fix button enabling logic to work with uploaded transcripts
+- [x] Add downloadFromGoogleDrive function to fetch transcript content
+- [x] Update extractActionItems procedure to fetch from Google Drive when transcript not provided
+- [x] Update frontend button to check transcriptUrl instead of local state
+- [ ] Test action item extraction from sample transcript
+- [ ] Verify extracted action items appear in tasks list
+
+## Action Item Extraction - Separation Issue
+- [x] Improve LLM prompt to extract individual action items separately
+- [x] Add clear instructions and examples to prevent clubbing action items
+- [x] Update system prompt to emphasize separate entries for each task
+- [ ] Test with sample transcript to verify each action item is extracted individually
+- [ ] Verify action items are properly separated in Review Queue
+
+## Review Queue UI Improvements
+- [x] Fix action items display to show each item separately in cards
+- [x] Add meeting title heading to action items review
+- [x] Format action item details (description, owner, deadline) clearly
+- [x] Add numbered badges for each action item
+- [x] Include meeting metadata in review item creation
+- [ ] Test improved UI with extracted action items
+
+## Action Items Edit Before Approval
+- [x] Add editable input fields for each action item (description, owner, deadline)
+- [x] Track edited values in component state (editedActionItems)
+- [x] Update approval handler to save edited action items
+- [ ] Test editing and approval workflow
+
+## Action Item Assignment Enhancements
+- [x] Add user picker dropdown to select from registered users
+- [x] Add manual name/email input fields for external assignees
+- [x] Create backend procedure to get all registered users (users.list)
+- [x] Create getUserByEmail and getAllUsers functions in db.ts
+- [x] Implement automatic task creation when action item is approved
+- [x] Check if assignee has account (ownerId) and create task in their list
+- [x] Link created task back to action item (taskId field)
+- [ ] Test complete workflow from extraction to task creation
+
+## Meeting Summary Generation
+- [x] Update backend generateSummary procedure to fetch transcript from Google Drive
+- [x] Upload generated summary to Google Drive (in Meeting Summaries folder)
+- [x] Store Google Drive URL in meeting record (minutesUrl field)
+- [x] Update Generate Summary button to work with uploaded transcripts
+- [x] Button enabled when transcriptUrl exists
+- [ ] Test complete workflow
+
+## Summary Format Improvements
+- [x] Improve LLM prompt for better formatted, readable summaries
+- [x] Use markdown format with clear sections and headings
+- [x] Change Google Drive folder to match transcript location (Meeting Transcripts folder)
+- [x] Save as .md file instead of .txt for better rendering
+- [ ] Test summary readability and formatting
+
+## Summary Storage Change
+- [x] Remove summaryText from database update
+- [x] Only store Google Drive link (minutesUrl)
+- [x] Summary exists only in Google Drive, not in app database
+
+## Meeting UI Improvements
+- [x] Display Google Drive summary link in meeting card header
+- [x] Add collapse/expand button to meeting cards
+- [x] Save expanded/collapsed state per meeting (using Set)
+- [x] Use ChevronDown/ChevronUp icons for visual feedback
+- [ ] Test UI improvements
+
+## Meeting Participant Picker
+- [x] Add user dropdown to select registered users as participants
+- [x] Add manual email input field for external participants
+- [x] Allow adding multiple participants (with + button or Enter key)
+- [x] Show selected participants as removable chips with X button
+- [x] Update handleCreate to use selectedParticipants array
+- [x] Update resetForm to clear participant selections
+- [x] Test participant selection in meeting creation
+
+## Meeting Delete & Google Meet
+- [x] Add delete meeting backend procedure (already exists)
+- [x] Add delete button to meeting UI
+- [x] Add confirmation dialog for delete
+- [x] Generate Google Meet link for meetings (unique link per meeting)
+- [x] Include Google Meet link in email invites (blue button)
+- [x] Display Google Meet link in meeting details (blue card with join button)
+- [x] Test delete and Google Meet functionality

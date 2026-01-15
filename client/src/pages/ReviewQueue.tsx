@@ -16,9 +16,11 @@ export default function ReviewQueue() {
   const [rejectNotes, setRejectNotes] = useState("");
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [recipientEmail, setRecipientEmail] = useState("");
+  const [editedActionItems, setEditedActionItems] = useState<Record<number, any[]>>({});
 
   const utils = trpc.useUtils();
   const { data: reviewItems, isLoading } = trpc.review.getPending.useQuery();
+  const { data: users } = trpc.users.list.useQuery();
   
   const approveMutation = trpc.review.approve.useMutation({
     onSuccess: () => {
@@ -51,9 +53,16 @@ export default function ReviewQueue() {
   });
 
   const handleApprove = (item: any) => {
+    let contentToApprove = editedContent !== item.content ? editedContent : undefined;
+    
+    // For action items, use edited action items if available
+    if (item.type === "action_items" && editedActionItems[item.id]) {
+      contentToApprove = JSON.stringify(editedActionItems[item.id]);
+    }
+    
     approveMutation.mutate({
       id: item.id,
-      editedContent: editedContent !== item.content ? editedContent : undefined,
+      editedContent: contentToApprove,
     });
   };
 
@@ -159,21 +168,128 @@ export default function ReviewQueue() {
                     </div>
                   )}
 
-                  <div className="mb-4">
-                    <Label htmlFor={`content-${item.id}`} className="text-foreground mb-2 block">
-                      {item.originalContent ? "Translated/Generated Content:" : "Content to Review:"}
-                    </Label>
-                    <Textarea
-                      id={`content-${item.id}`}
-                      value={selectedItem?.id === item.id ? editedContent : item.content}
-                      onChange={(e) => {
-                        setSelectedItem(item);
-                        setEditedContent(e.target.value);
-                      }}
-                      rows={8}
-                      className="font-mono text-sm"
-                    />
-                  </div>
+                  {item.type === "action_items" ? (
+                    // Special rendering for action items
+                    <div className="mb-4">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-foreground mb-3">
+                          {item.metadata ? JSON.parse(item.metadata).meetingTitle || "Action Items" : "Action Items"}
+                        </h3>
+                      </div>
+                      <div className="space-y-3">
+                        {(() => {
+                          try {
+                            const actionItems = JSON.parse(item.content);
+                            // Initialize edited items if not already done
+                            if (!editedActionItems[item.id]) {
+                              setEditedActionItems(prev => ({ ...prev, [item.id]: actionItems }));
+                            }
+                            const currentItems = editedActionItems[item.id] || actionItems;
+                            
+                            return currentItems.map((actionItem: any, index: number) => (
+                              <div key={index} className="p-4 border rounded-lg bg-card">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
+                                    {index + 1}
+                                  </div>
+                                  <div className="flex-1 space-y-3">
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground mb-1">Description</Label>
+                                      <Textarea
+                                        value={actionItem.description}
+                                        onChange={(e) => {
+                                          const updated = [...currentItems];
+                                          updated[index] = { ...updated[index], description: e.target.value };
+                                          setEditedActionItems(prev => ({ ...prev, [item.id]: updated }));
+                                        }}
+                                        rows={2}
+                                        className="text-sm"
+                                      />
+                                    </div>
+                                    <div className="space-y-3">
+                                      <div>
+                                        <Label className="text-xs text-muted-foreground mb-1">Assign to User</Label>
+                                        <select
+                                          value={actionItem.ownerId || ""}
+                                          onChange={(e) => {
+                                            const updated = [...currentItems];
+                                            const userId = e.target.value ? Number(e.target.value) : null;
+                                            const selectedUser = users?.find(u => u.id === userId);
+                                            updated[index] = { 
+                                              ...updated[index], 
+                                              ownerId: userId,
+                                              ownerEmail: selectedUser?.email || updated[index].ownerEmail
+                                            };
+                                            setEditedActionItems(prev => ({ ...prev, [item.id]: updated }));
+                                          }}
+                                          className="w-full px-3 py-2 border rounded-md text-sm"
+                                        >
+                                          <option value="">-- Select registered user --</option>
+                                          {users?.map(user => (
+                                            <option key={user.id} value={user.id}>
+                                              {user.name || user.email}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                      <div>
+                                        <Label className="text-xs text-muted-foreground mb-1">Or enter email manually</Label>
+                                        <input
+                                          type="text"
+                                          value={actionItem.ownerEmail || ""}
+                                          onChange={(e) => {
+                                            const updated = [...currentItems];
+                                            updated[index] = { ...updated[index], ownerEmail: e.target.value, ownerId: null };
+                                            setEditedActionItems(prev => ({ ...prev, [item.id]: updated }));
+                                          }}
+                                          className="w-full px-3 py-2 border rounded-md text-sm"
+                                          placeholder="Email address for external user"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3">
+                                      <div>
+                                        <Label className="text-xs text-muted-foreground mb-1">Deadline</Label>
+                                        <input
+                                          type="date"
+                                          value={actionItem.deadline ? new Date(actionItem.deadline).toISOString().split('T')[0] : ""}
+                                          onChange={(e) => {
+                                            const updated = [...currentItems];
+                                            updated[index] = { ...updated[index], deadline: e.target.value ? new Date(e.target.value).toISOString() : null };
+                                            setEditedActionItems(prev => ({ ...prev, [item.id]: updated }));
+                                          }}
+                                          className="w-full px-3 py-2 border rounded-md text-sm"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          } catch (e) {
+                            return <p className="text-destructive">Error parsing action items</p>;
+                          }
+                        })()}
+                      </div>
+                    </div>
+                  ) : (
+                    // Default rendering for other types
+                    <div className="mb-4">
+                      <Label htmlFor={`content-${item.id}`} className="text-foreground mb-2 block">
+                        {item.originalContent ? "Translated/Generated Content:" : "Content to Review:"}
+                      </Label>
+                      <Textarea
+                        id={`content-${item.id}`}
+                        value={selectedItem?.id === item.id ? editedContent : item.content}
+                        onChange={(e) => {
+                          setSelectedItem(item);
+                          setEditedContent(e.target.value);
+                        }}
+                        rows={8}
+                        className="font-mono text-sm"
+                      />
+                    </div>
+                  )}
 
                   {item.metadata && (
                     <div className="mb-4 p-3 bg-muted/20 rounded-lg">

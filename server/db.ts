@@ -105,6 +105,24 @@ export async function getUserById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getAllUsers() {
+  const db = await getDb();
+  if (!db) return [];
+  const result = await db.select({
+    id: users.id,
+    name: users.name,
+    email: users.email,
+  }).from(users);
+  return result;
+}
+
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
 // ============= Meeting Management =============
 
 export async function createMeeting(meeting: InsertMeeting): Promise<Meeting> {
