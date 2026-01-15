@@ -124,3 +124,8 @@
 - [x] Add smooth transitions between pages
 - [x] Add loading spinners for button actions
 - [x] Improve overall animation consistency
+
+## OAuth Redirect URI Fix
+- [x] Update googleApi.ts to detect and use published URL instead of localhost
+- [x] Test OAuth authorization with published URL
+- [ ] Verify redirect works correctly after authorization (requires user to complete OAuth)
