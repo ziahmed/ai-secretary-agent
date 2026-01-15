@@ -193,3 +193,10 @@
 - [x] Add getCompleted procedure to review router
 - [x] Add ApprovalHistory route and navigation
 - [x] Test all new features (ready for checkpoint)
+
+## Calendar Enhancements
+- [x] Add Day view to calendar (alongside month/week)
+- [x] Display conflict indicators on calendar events
+- [x] Make meeting invites clickable
+- [x] Add reschedule dialog to calendar meetings
+- [x] Test all calendar features
