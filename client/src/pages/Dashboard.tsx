@@ -1,16 +1,32 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, CheckSquare, AlertCircle, Clock } from "lucide-react";
+import { Calendar, CheckSquare, AlertCircle, Clock, Bell } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
+  const utils = trpc.useUtils();
   const { data: tasks, isLoading: tasksLoading } = trpc.tasks.list.useQuery();
   const { data: meetings, isLoading: meetingsLoading } = trpc.meetings.list.useQuery();
   const { data: overdueTasks } = trpc.tasks.getOverdue.useQuery();
   const { data: reviewItems } = trpc.review.getPending.useQuery();
+  
+  const generateRemindersMutation = trpc.tasks.generateReminders.useMutation({
+    onSuccess: (data) => {
+      utils.review.getPending.invalidate();
+      if (data.remindersGenerated > 0) {
+        toast.success(`Generated ${data.remindersGenerated} reminder(s)`);
+      } else {
+        toast.info("No tasks need reminders at this time");
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to generate reminders");
+    },
+  });
 
   const openTasks = tasks?.filter(t => t.status === 'open' || t.status === 'in_progress') || [];
   const upcomingMeetings = meetings?.filter(m => m.status === 'scheduled') || [];
@@ -18,9 +34,19 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-foreground mt-2">Overview of your tasks, meetings, and pending reviews</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-foreground mt-2">Overview of your tasks, meetings, and pending reviews</p>
+          </div>
+          <Button
+            onClick={() => generateRemindersMutation.mutate()}
+            disabled={generateRemindersMutation.isPending}
+            className="gap-2"
+          >
+            <Bell className="h-4 w-4" />
+            {generateRemindersMutation.isPending ? "Generating..." : "Generate Reminders"}
+          </Button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

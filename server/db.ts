@@ -301,6 +301,19 @@ export async function getPendingReviewItems() {
     .orderBy(desc(reviewQueue.createdAt));
 }
 
+export async function getCompletedReviewItems() {
+  const db = await getDb();
+  if (!db) return [];
+  const { or } = await import('drizzle-orm');
+  return await db.select().from(reviewQueue)
+    .where(or(
+      eq(reviewQueue.status, 'approved'),
+      eq(reviewQueue.status, 'rejected'),
+      eq(reviewQueue.status, 'edited')
+    ))
+    .orderBy(desc(reviewQueue.reviewedAt));
+}
+
 export async function getReviewItemById(id: number) {
   const db = await getDb();
   if (!db) return undefined;

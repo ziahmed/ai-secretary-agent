@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, Calendar, CheckSquare, FileText, MessageSquare, Cloud, MailCheck } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Calendar, CheckSquare, FileText, MessageSquare, Cloud, MailCheck, History } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -34,6 +34,7 @@ const allMenuItems = [
   { icon: CheckSquare, label: "Tasks", path: "/tasks" },
   { icon: Calendar, label: "Calendar View", path: "/calendar" },
   { icon: FileText, label: "Review Queue", path: "/review" },
+  { icon: History, label: "Approval History", path: "/approval-history" },
   { icon: MailCheck, label: "Email Tracking", path: "/email-tracking", ownerOnly: true },
   { icon: Cloud, label: "Google Sync", path: "/google-sync", ownerOnly: true },
 ];

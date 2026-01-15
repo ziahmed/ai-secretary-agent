@@ -179,3 +179,17 @@
 - [x] Display conflict warnings in frontend UI
 - [x] Test conflict detection with overlapping meetings
 - [x] All 8 conflict detection tests passing
+
+## Feature Enhancements
+- [x] Add automatic task reminder generation (daily check for tasks due within 48 hours)
+- [x] Add lastReminderSent field to tasks table (already exists)
+- [x] Highlight reminder items in review queue with distinct color (amber border and background)
+- [x] Add "Generate Reminders" button to dashboard for manual trigger
+- [ ] Make calendar view editable for owner (drag-and-drop, click to edit)
+- [ ] Add meeting view toggle (list view vs expanded view)
+- [x] Add email sending to review approval workflow with secretary.omega2@gmail.com as default sender
+- [x] Add recipient email input field to review items
+- [x] Create approval history page showing completed reviews
+- [x] Add getCompleted procedure to review router
+- [x] Add ApprovalHistory route and navigation
+- [x] Test all new features (ready for checkpoint)

@@ -479,6 +479,84 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await db.updateTask(input.id, { status: "completed" });
       }),
+
+    generateReminders: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        // Find tasks due within 48 hours that haven't had reminders sent recently
+        const now = new Date();
+        const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+        
+        const allTasks = await db.getAllTasks();
+        const tasksNeedingReminders = allTasks.filter(task => {
+          if (!task.deadline) return false;
+          if (task.status === 'completed') return false;
+          
+          const deadline = new Date(task.deadline);
+          const isApproachingDeadline = deadline >= now && deadline <= in48Hours;
+          
+          // Check if reminder was sent in last 24 hours
+          if (task.lastReminderSent) {
+            const lastSent = new Date(task.lastReminderSent);
+            const hoursSinceLastReminder = (now.getTime() - lastSent.getTime()) / (1000 * 60 * 60);
+            if (hoursSinceLastReminder < 24) return false;
+          }
+          
+          return isApproachingDeadline;
+        });
+        
+        // Generate reminder emails for each task
+        const remindersCreated = [];
+        for (const task of tasksNeedingReminders) {
+          try {
+            const response = await invokeLLM({
+              messages: [
+                {
+                  role: "system",
+                  content: "You are an AI secretary. Draft a professional, concise reminder email for a task approaching its deadline."
+                },
+                {
+                  role: "user",
+                  content: `Draft a reminder email for this task:
+Title: ${task.title}
+Description: ${task.description || "No description"}
+Deadline: ${new Date(task.deadline!).toLocaleString()}
+Priority: ${task.priority}`
+                }
+              ]
+            });
+            
+            const emailDraft = (typeof response.choices[0]?.message?.content === 'string'
+              ? response.choices[0]?.message?.content
+              : "");
+            
+            // Create review item with reminder type
+            await db.createReviewItem({
+              type: "email_draft",
+              referenceId: task.id,
+              content: emailDraft,
+              metadata: JSON.stringify({ 
+                taskId: task.id, 
+                recipientEmail: task.ownerEmail || 'secretary.omega2@gmail.com',
+                isReminder: true 
+              }),
+              createdBy: ctx.user.id,
+            });
+            
+            // Update lastReminderSent
+            await db.updateTask(task.id, { lastReminderSent: now });
+            
+            remindersCreated.push(task.id);
+          } catch (error) {
+            console.error(`Failed to generate reminder for task ${task.id}:`, error);
+          }
+        }
+        
+        return { 
+          success: true, 
+          remindersGenerated: remindersCreated.length,
+          taskIds: remindersCreated 
+        };
+      }),
   }),
 
   // ============= Action Items Management =============
@@ -508,6 +586,10 @@ export const appRouter = router({
   review: router({
     getPending: protectedProcedure.query(async () => {
       return await db.getPendingReviewItems();
+    }),
+
+    getCompleted: protectedProcedure.query(async () => {
+      return await db.getCompletedReviewItems();
     }),
 
     getById: protectedProcedure

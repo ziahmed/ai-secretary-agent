@@ -13,6 +13,7 @@ import GoogleSync from "./pages/GoogleSync";
 import Chat from "./pages/Chat";
 import Calendar from "./pages/Calendar";
 import EmailTracking from "./pages/EmailTracking";
+import ApprovalHistory from "./pages/ApprovalHistory";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/chat" component={Chat} />
       <Route path="/calendar" component={Calendar} />
       <Route path="/email-tracking" component={EmailTracking} />
+      <Route path="/approval-history" component={ApprovalHistory} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -15,6 +15,7 @@ export default function ReviewQueue() {
   const [editedContent, setEditedContent] = useState("");
   const [rejectNotes, setRejectNotes] = useState("");
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [recipientEmail, setRecipientEmail] = useState("");
 
   const utils = trpc.useUtils();
   const { data: reviewItems, isLoading } = trpc.review.getPending.useQuery();
@@ -120,8 +121,13 @@ export default function ReviewQueue() {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {reviewItems?.map((item) => (
-              <Card key={item.id}>
+            {reviewItems?.map((item) => {
+              // Check if this is a reminder item
+              const metadata = item.metadata ? JSON.parse(item.metadata) : {};
+              const isReminder = metadata.isReminder === true;
+              
+              return (
+              <Card key={item.id} className={isReminder ? "border-l-4 border-l-amber-500 bg-amber-50/50" : ""}>
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
@@ -173,6 +179,25 @@ export default function ReviewQueue() {
                     </div>
                   )}
 
+                  {item.type === "email_draft" && (
+                    <div className="mb-4">
+                      <Label htmlFor={`email-${item.id}`} className="text-foreground mb-2 block">
+                        Recipient Email:
+                      </Label>
+                      <input
+                        id={`email-${item.id}`}
+                        type="email"
+                        value={recipientEmail || (item.metadata ? JSON.parse(item.metadata).recipientEmail : 'secretary.omega2@gmail.com')}
+                        onChange={(e) => setRecipientEmail(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-md"
+                        placeholder="secretary.omega2@gmail.com"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Default sender: secretary.omega2@gmail.com | CC: Approver
+                      </p>
+                    </div>
+                  )}
+
                   <div className="flex gap-2">
                     <Button
                       onClick={() => {
@@ -220,7 +245,8 @@ export default function ReviewQueue() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            );
+            })}
           </div>
         )}
 
