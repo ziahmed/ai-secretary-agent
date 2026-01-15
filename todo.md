@@ -124,3 +124,10 @@
 - [x] Add smooth transitions between pages
 - [x] Add loading spinners for button actions
 - [x] Improve overall animation consistency
+
+## Re-authorize Button for Google OAuth
+- [x] Check existing Google OAuth routes and infrastructure
+- [x] Add re-authorize button to Google Sync page UI
+- [x] Ensure button links to correct OAuth endpoint
+- [x] Test re-authorization flow end-to-end
+- [x] Verify new refresh token can be obtained
