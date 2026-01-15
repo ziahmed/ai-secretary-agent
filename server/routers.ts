@@ -103,6 +103,50 @@ export const appRouter = router({
         
         const updatedMeeting = await db.updateMeeting(id, updateData);
         
+        if (!updatedMeeting) {
+          throw new Error('Failed to update meeting');
+        }
+        
+        // Check if meeting details changed (date, time, location) and send update emails
+        const participantsList = updatedMeeting.participants 
+          ? JSON.parse(updatedMeeting.participants) 
+          : [];
+        
+        const hasDateChanged = input.meetingDate && existingMeeting && 
+          input.meetingDate.getTime() !== existingMeeting.meetingDate.getTime();
+        const hasLocationChanged = input.location !== undefined && existingMeeting && 
+          input.location !== existingMeeting.location;
+        const hasDurationChanged = input.duration !== undefined && existingMeeting && 
+          input.duration !== existingMeeting.duration;
+        
+        // Send updated invite if meeting details changed (but not cancelled)
+        if ((hasDateChanged || hasLocationChanged || hasDurationChanged) && 
+            input.status !== 'cancelled' && 
+            participantsList.length > 0) {
+          try {
+            await sendMeetingInvite({
+              to: participantsList,
+              meetingTitle: updatedMeeting.title,
+              meetingDate: updatedMeeting.meetingDate,
+              location: updatedMeeting.location || undefined,
+              description: updatedMeeting.description || undefined,
+              organizerEmail: ctx.user.email || 'noreply@ai-secretary.com',
+              organizerName: ctx.user.name || 'AI Secretary',
+            });
+            
+            // Log the email send
+            await db.createEmailLog({
+              recipientEmail: participantsList.join(', '),
+              subject: `Meeting Updated: ${updatedMeeting.title}`,
+              body: `Meeting invite updated for ${updatedMeeting.title} on ${updatedMeeting.meetingDate.toLocaleString()}`,
+              emailType: 'meeting_invite',
+            });
+          } catch (error) {
+            console.error('Failed to send updated meeting invites:', error);
+            // Don't fail the update if email sending fails
+          }
+        }
+        
         // Send cancellation email if status changed to cancelled
         if (input.status === 'cancelled' && existingMeeting && existingMeeting.status !== 'cancelled') {
           const participantsList = existingMeeting.participants 

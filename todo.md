@@ -134,6 +134,12 @@
 
 ## Add gmail.send Scope for Email Delivery
 - [x] Add gmail.send scope to SCOPES array in googleApi.ts
-- [ ] Guide user to re-authorize with new scope
-- [ ] Update GOOGLE_REFRESH_TOKEN with new token
+- [x] Guide user to re-authorize with new scope
+- [x] Update GOOGLE_REFRESH_TOKEN with new token
 - [ ] Test email delivery to verify emails are actually sent
+
+## Fix Email Sending for Web App Meeting Updates
+- [x] Investigate meeting.create and meeting.update procedures
+- [x] Check if email sending logic is being called
+- [x] Fix email trigger for meetings created/updated via web app
+- [ ] Test that calendar invites are sent when meetings are rescheduled
