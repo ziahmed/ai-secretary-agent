@@ -225,6 +225,24 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    generateMeetLink: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const meeting = await db.getMeetingById(input.id);
+        if (!meeting) {
+          throw new Error('Meeting not found');
+        }
+        
+        // Generate a unique Google Meet-style link
+        const meetingCode = Math.random().toString(36).substring(2, 12);
+        const meetLink = `https://meet.google.com/${meetingCode}`;
+        
+        // Update meeting with new meet link
+        await db.updateMeeting(input.id, { meetLink });
+        
+        return { meetLink };
+      }),
+
     resendInvites: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {

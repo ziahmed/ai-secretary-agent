@@ -118,6 +118,16 @@ export default function Meetings() {
     },
   });
 
+  const generateMeetLinkMutation = trpc.meetings.generateMeetLink.useMutation({
+    onSuccess: (data) => {
+      utils.meetings.list.invalidate();
+      toast.success("Google Meet link generated successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to generate meet link");
+    },
+  });
+
   const updateMeetingMutation = trpc.meetings.update.useMutation({
     onSuccess: (data: any) => {
       utils.meetings.list.invalidate();
@@ -492,6 +502,16 @@ export default function Meetings() {
                     </div>
                     
                     <div className="flex flex-wrap gap-2">
+                      {!meeting.meetLink && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => generateMeetLinkMutation.mutate({ id: meeting.id })}
+                          disabled={generateMeetLinkMutation.isPending}
+                        >
+                          🎥 Generate Meet Link
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"

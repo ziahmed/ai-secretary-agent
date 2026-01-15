@@ -297,3 +297,11 @@
 - [x] Include Google Meet link in email invites (blue button)
 - [x] Display Google Meet link in meeting details (blue card with join button)
 - [x] Test delete and Google Meet functionality
+
+## Google Meet Link Display Bug
+- [x] Investigate why Google Meet link is not showing for new meetings
+- [x] Verify meetLink is being saved to database (field exists, only new meetings have links)
+- [x] Add "Generate Meet Link" button for existing meetings without links
+- [x] Create backend procedure to generate meet link for existing meeting (generateMeetLink)
+- [x] Button only shows when meeting doesn't have a meetLink
+- [x] Test generating link for existing meeting
