@@ -171,3 +171,11 @@
 - [ ] Test owner-only access controls
 - [ ] Test dashboard navigation
 - [ ] Test email CC functionality
+
+## Meeting Conflict Detection
+- [x] Add checkMeetingConflicts function to db.ts
+- [x] Add conflict detection to meeting.create procedure
+- [x] Add conflict detection to meeting.update procedure
+- [x] Display conflict warnings in frontend UI
+- [x] Test conflict detection with overlapping meetings
+- [x] All 8 conflict detection tests passing

@@ -43,6 +43,12 @@ export const appRouter = router({
         participants: z.array(z.string()).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
+        // Check for conflicts before creating
+        const conflicts = await db.checkMeetingConflicts(
+          input.meetingDate,
+          input.duration || 60
+        );
+        
         const meeting = await db.createMeeting({
           ...input,
           participants: input.participants ? JSON.stringify(input.participants) : null,
@@ -75,7 +81,10 @@ export const appRouter = router({
           }
         }
         
-        return meeting;
+        return { 
+          ...meeting, 
+          conflicts: conflicts.length > 0 ? conflicts : undefined 
+        };
       }),
 
     update: protectedProcedure
@@ -95,6 +104,14 @@ export const appRouter = router({
         
         // Get the meeting before update to check status change
         const existingMeeting = await db.getMeetingById(id);
+        
+        // Check for conflicts if date or duration is being updated
+        let conflicts: any[] = [];
+        if (input.meetingDate || input.duration) {
+          const checkDate = input.meetingDate || existingMeeting?.meetingDate || new Date();
+          const checkDuration = input.duration || existingMeeting?.duration || 60;
+          conflicts = await db.checkMeetingConflicts(checkDate, checkDuration, id);
+        }
         
         const updateData: any = { ...updates };
         if (participants) {
@@ -182,7 +199,10 @@ export const appRouter = router({
           }
         }
         
-        return updatedMeeting;
+        return { 
+          ...updatedMeeting, 
+          conflicts: conflicts.length > 0 ? conflicts : undefined 
+        };
       }),
 
     delete: protectedProcedure

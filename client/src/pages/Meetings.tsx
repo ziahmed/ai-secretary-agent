@@ -28,11 +28,19 @@ export default function Meetings() {
     new Date(b.meetingDate).getTime() - new Date(a.meetingDate).getTime()
   );
   const createMutation = trpc.meetings.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       utils.meetings.list.invalidate();
       setIsCreateOpen(false);
       resetForm();
-      toast.success("Meeting created successfully");
+      
+      if (data.conflicts && data.conflicts.length > 0) {
+        const conflictTitles = data.conflicts.map((c: any) => c.title).join(', ');
+        toast.warning(`Meeting created, but conflicts with: ${conflictTitles}`, {
+          duration: 5000,
+        });
+      } else {
+        toast.success("Meeting created successfully");
+      }
     },
   });
 
@@ -97,9 +105,17 @@ export default function Meetings() {
   };
   
   const updateMeetingMutation = trpc.meetings.update.useMutation({
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       utils.meetings.list.invalidate();
-      toast.success("Meeting updated successfully");
+      
+      if (data.conflicts && data.conflicts.length > 0) {
+        const conflictTitles = data.conflicts.map((c: any) => c.title).join(', ');
+        toast.warning(`Meeting updated, but conflicts with: ${conflictTitles}`, {
+          duration: 5000,
+        });
+      } else {
+        toast.success("Meeting updated successfully");
+      }
     },
     onError: (error) => {
       toast.error(error.message || "Failed to update meeting");

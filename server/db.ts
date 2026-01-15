@@ -1,4 +1,4 @@
-import { eq, desc, and, or, lt, gte, sql } from "drizzle-orm";
+import { eq, desc, and, or, lt, gte, sql, ne } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users, 
@@ -154,6 +154,45 @@ export async function deleteMeeting(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(meetings).where(eq(meetings.id, id));
+}
+
+/**
+ * Check for meeting conflicts with existing meetings
+ * @param meetingDate Start date/time of the meeting
+ * @param duration Duration in minutes
+ * @param excludeMeetingId Optional meeting ID to exclude from conflict check (for updates)
+ * @returns Array of conflicting meetings
+ */
+export async function checkMeetingConflicts(
+  meetingDate: Date,
+  duration: number = 60,
+  excludeMeetingId?: number
+): Promise<Meeting[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Calculate end time of the new meeting
+  const meetingEnd = new Date(meetingDate.getTime() + duration * 60000);
+  
+  // Get all non-cancelled meetings
+  const allMeetings = await db.select()
+    .from(meetings)
+    .where(and(
+      ne(meetings.status, 'cancelled'),
+      excludeMeetingId ? ne(meetings.id, excludeMeetingId) : undefined
+    ));
+  
+  // Filter meetings that overlap with the new meeting time
+  const conflicts = allMeetings.filter(meeting => {
+    const existingStart = new Date(meeting.meetingDate);
+    const existingEnd = new Date(existingStart.getTime() + (meeting.duration || 60) * 60000);
+    
+    // Check if meetings overlap
+    // Overlap occurs if: (newStart < existingEnd) AND (newEnd > existingStart)
+    return meetingDate < existingEnd && meetingEnd > existingStart;
+  });
+  
+  return conflicts;
 }
 
 // ============= Task Management =============
