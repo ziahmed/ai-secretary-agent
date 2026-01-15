@@ -305,3 +305,14 @@
 - [x] Create backend procedure to generate meet link for existing meeting (generateMeetLink)
 - [x] Button only shows when meeting doesn't have a meetLink
 - [x] Test generating link for existing meeting
+
+## Review Queue Email Notifications
+- [x] Add email notification dialog after approve/reject actions
+- [x] Allow selecting recipient (person assigned, secretary, or custom email)
+- [x] Dialog shows after approve or reject with action status
+- [x] User dropdown includes all registered users plus secretary option
+- [x] Custom email input field for manual entry
+- [x] Create backend procedure to send approval/rejection notifications (review.sendNotification)
+- [x] Connect frontend to backend mutation
+- [x] Include review item details in notification
+- [x] Test notification workflow

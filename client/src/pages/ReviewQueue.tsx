@@ -17,26 +17,32 @@ export default function ReviewQueue() {
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [recipientEmail, setRecipientEmail] = useState("");
   const [editedActionItems, setEditedActionItems] = useState<Record<number, any[]>>({});
+  const [isNotificationDialogOpen, setIsNotificationDialogOpen] = useState(false);
+  const [notificationEmail, setNotificationEmail] = useState("");
+  const [notificationAction, setNotificationAction] = useState<'approved' | 'rejected'>('approved');
+  const [pendingApprovalItem, setPendingApprovalItem] = useState<any>(null);
 
   const utils = trpc.useUtils();
   const { data: reviewItems, isLoading } = trpc.review.getPending.useQuery();
   const { data: users } = trpc.users.list.useQuery();
   
   const approveMutation = trpc.review.approve.useMutation({
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       utils.review.getPending.invalidate();
-      setSelectedItem(null);
-      setEditedContent("");
+      setPendingApprovalItem({ id: variables.id, action: 'approved' });
+      setNotificationAction('approved');
+      setIsNotificationDialogOpen(true);
       toast.success("Item approved successfully");
     },
   });
 
   const rejectMutation = trpc.review.reject.useMutation({
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       utils.review.getPending.invalidate();
-      setSelectedItem(null);
-      setRejectNotes("");
       setIsRejectDialogOpen(false);
+      setPendingApprovalItem({ id: variables.id, action: 'rejected' });
+      setNotificationAction('rejected');
+      setIsNotificationDialogOpen(true);
       toast.success("Item rejected");
     },
   });
@@ -49,6 +55,15 @@ export default function ReviewQueue() {
     onError: (error) => {
       toast.error(`Failed to send email: ${error.message}`);
       console.error('Email send error:', error);
+    },
+  });
+
+  const sendNotificationMutation = trpc.review.sendNotification.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (error) => {
+      toast.error(`Failed to send notification: ${error.message}`);
     },
   });
 
@@ -395,6 +410,81 @@ export default function ReviewQueue() {
               </Button>
               <Button variant="destructive" onClick={handleReject} disabled={rejectMutation.isPending}>
                 Reject
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isNotificationDialogOpen} onOpenChange={setIsNotificationDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-foreground">Send Notification</DialogTitle>
+              <DialogDescription className="text-foreground">
+                Item has been {notificationAction}. Would you like to notify someone?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="notifyUser" className="text-foreground mb-2">Select User to Notify</Label>
+                <select
+                  id="notifyUser"
+                  value={notificationEmail || ""}
+                  onChange={(e) => setNotificationEmail(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md"
+                >
+                  <option value="">-- Select a user --</option>
+                  {users?.map(user => (
+                    <option key={user.id} value={user.email || ""}>
+                      {user.name || user.email}
+                    </option>
+                  ))}
+                  <option value="secretary.omega2@gmail.com">Secretary (secretary.omega2@gmail.com)</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="customEmail" className="text-foreground mb-2">Or Enter Custom Email</Label>
+                <input
+                  id="customEmail"
+                  type="email"
+                  value={notificationEmail}
+                  onChange={(e) => setNotificationEmail(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md"
+                  placeholder="Enter email address"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsNotificationDialogOpen(false);
+                  setNotificationEmail("");
+                  setSelectedItem(null);
+                  setEditedContent("");
+                  setRejectNotes("");
+                }}
+              >
+                Skip Notification
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (notificationEmail && pendingApprovalItem) {
+                    sendNotificationMutation.mutate({
+                      reviewId: pendingApprovalItem.id,
+                      recipientEmail: notificationEmail,
+                      action: pendingApprovalItem.action,
+                    });
+                  }
+                  setIsNotificationDialogOpen(false);
+                  setNotificationEmail("");
+                  setSelectedItem(null);
+                  setEditedContent("");
+                  setRejectNotes("");
+                  setPendingApprovalItem(null);
+                }}
+                disabled={!notificationEmail || sendNotificationMutation.isPending}
+              >
+                {sendNotificationMutation.isPending ? "Sending..." : "Send Notification"}
               </Button>
             </DialogFooter>
           </DialogContent>

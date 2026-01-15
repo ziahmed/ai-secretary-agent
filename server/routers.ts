@@ -800,6 +800,25 @@ Priority: ${task.priority}`
           reviewNotes: input.notes,
         });
       }),
+
+    sendNotification: protectedProcedure
+      .input(z.object({
+        reviewId: z.number(),
+        recipientEmail: z.string().email(),
+        action: z.enum(['approved', 'rejected']),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const reviewItem = await db.getReviewItemById(input.reviewId);
+        if (!reviewItem) throw new Error("Review item not found");
+
+        // TODO: Implement email sending logic
+        // For now, just log the notification
+        console.log(`Sending ${input.action} notification to ${input.recipientEmail}`);
+        console.log(`Review item type: ${reviewItem.type}`);
+        console.log(`Review item content preview: ${reviewItem.content.substring(0, 100)}...`);
+
+        return { success: true, message: `Notification sent to ${input.recipientEmail}` };
+      }),
   }),
 
   // ============= Chat Management =============
