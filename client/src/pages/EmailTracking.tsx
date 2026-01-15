@@ -1,6 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
+import { Mail, CheckCircle, XCircle, Clock, Eye, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { EmailLog } from "../../../drizzle/schema";
 
 export default function EmailTracking() {
@@ -21,6 +22,17 @@ export default function EmailTracking() {
   return (
     <div className="container mx-auto py-8">
       <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.history.back()}
+            className="-ml-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </div>
         <h1 className="text-3xl font-bold text-black">Email Tracking</h1>
         <p className="text-gray-600 mt-1">Monitor email delivery and engagement status</p>
       </div>

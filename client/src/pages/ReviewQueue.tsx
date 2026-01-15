@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { FileText, CheckCircle, XCircle, Edit } from "lucide-react";
+import { FileText, CheckCircle, XCircle, Edit, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
 
@@ -90,6 +90,17 @@ export default function ReviewQueue() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.history.back()}
+              className="-ml-2"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold text-foreground">Review Queue</h1>
           <p className="text-foreground mt-2">Review and approve AI-generated content before distribution</p>
         </div>

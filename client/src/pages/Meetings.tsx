@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { Calendar, Plus, FileText, Mail } from "lucide-react";
+import { Calendar, Plus, FileText, Mail, ArrowLeft, X, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Meetings() {
@@ -21,7 +21,12 @@ export default function Meetings() {
   const [selectedMeetingId, setSelectedMeetingId] = useState<number | null>(null);
 
   const utils = trpc.useUtils();
-  const { data: meetings, isLoading } = trpc.meetings.list.useQuery();
+  const { data: meetingsData, isLoading } = trpc.meetings.list.useQuery();
+  
+  // Sort meetings by date (latest first)
+  const meetings = meetingsData?.slice().sort((a, b) => 
+    new Date(b.meetingDate).getTime() - new Date(a.meetingDate).getTime()
+  );
   const createMutation = trpc.meetings.create.useMutation({
     onSuccess: () => {
       utils.meetings.list.invalidate();
@@ -55,6 +60,45 @@ export default function Meetings() {
       toast.error(error.message || "Failed to resend invites");
     },
   });
+  
+  const updateMeetingMutation = trpc.meetings.update.useMutation({
+    onSuccess: () => {
+      utils.meetings.list.invalidate();
+      toast.success("Meeting updated successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update meeting");
+    },
+  });
+  
+  const handleCancelMeeting = (meetingId: number, meetingTitle: string) => {
+    if (confirm(`Are you sure you want to cancel "${meetingTitle}"?`)) {
+      updateMeetingMutation.mutate({
+        id: meetingId,
+        status: "cancelled",
+        cancellationReason: "Cancelled by secretary"
+      });
+    }
+  };
+  
+  const handleRescheduleMeeting = (meetingId: number) => {
+    const newDate = prompt("Enter new date and time (YYYY-MM-DDTHH:MM):");
+    if (newDate) {
+      try {
+        const date = new Date(newDate);
+        if (isNaN(date.getTime())) {
+          toast.error("Invalid date format");
+          return;
+        }
+        updateMeetingMutation.mutate({
+          id: meetingId,
+          meetingDate: date
+        });
+      } catch (error) {
+        toast.error("Invalid date format");
+      }
+    }
+  };
 
   const resetForm = () => {
     setTitle("");
@@ -106,6 +150,17 @@ export default function Meetings() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
+            <div className="flex items-center gap-3 mb-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.history.back()}
+                className="-ml-2"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </div>
             <h1 className="text-3xl font-bold text-foreground">Meetings</h1>
             <p className="text-foreground mt-2">Manage meetings, generate summaries, and extract action items</p>
           </div>
@@ -293,6 +348,29 @@ export default function Meetings() {
                           <Mail className="h-4 w-4 mr-2" />
                           Resend Invites
                         </Button>
+                      )}
+                      {meeting.status !== 'cancelled' && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRescheduleMeeting(meeting.id)}
+                            disabled={updateMeetingMutation.isPending}
+                          >
+                            <CalendarClock className="h-4 w-4 mr-2" />
+                            Reschedule
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCancelMeeting(meeting.id, meeting.title)}
+                            disabled={updateMeetingMutation.isPending}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <X className="h-4 w-4 mr-2" />
+                            Cancel Meeting
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>

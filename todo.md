@@ -143,3 +143,15 @@
 - [x] Check if email sending logic is being called
 - [x] Fix email trigger for meetings created/updated via web app
 - [ ] Test that calendar invites are sent when meetings are rescheduled
+
+## UI Improvements
+- [x] Add back button to Meetings page
+- [x] Sort meetings list by date (latest first, oldest last)
+- [x] Add cancel button to meeting cards
+- [x] Add reschedule button to meeting cards
+- [x] Add back button to Tasks page
+- [x] Add back button to Calendar page
+- [x] Add back button to EmailTracking page
+- [x] Add back button to GoogleSync page
+- [x] Add back button to ReviewQueue page
+- [x] Test navigation flow with back buttons

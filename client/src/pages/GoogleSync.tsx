@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
-import { Calendar, Mail, RefreshCw, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Calendar, Mail, RefreshCw, CheckCircle, XCircle, AlertCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function GoogleSync() {
@@ -63,6 +63,17 @@ export default function GoogleSync() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.history.back()}
+              className="-ml-2"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold text-foreground">Google Integration</h1>
           <p className="text-foreground mt-2">Sync meetings from Google Calendar and emails from Gmail</p>
         </div>

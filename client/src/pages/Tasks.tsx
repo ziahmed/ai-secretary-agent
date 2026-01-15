@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
-import { CheckSquare, Plus, AlertCircle, Clock } from "lucide-react";
+import { CheckSquare, Plus, AlertCircle, Clock, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Tasks() {
@@ -105,6 +105,17 @@ export default function Tasks() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
+            <div className="flex items-center gap-3 mb-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.history.back()}
+                className="-ml-2"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </div>
             <h1 className="text-3xl font-bold text-foreground">Tasks</h1>
             <p className="text-foreground mt-2">Track and manage all tasks with priorities and deadlines</p>
           </div>
