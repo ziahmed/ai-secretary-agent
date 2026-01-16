@@ -16,6 +16,7 @@ export default function Meetings() {
   const [description, setDescription] = useState("");
   const [meetingDate, setMeetingDate] = useState("");
   const [location, setLocation] = useState("");
+  const [customMeetLink, setCustomMeetLink] = useState("");
   const [participants, setParticipants] = useState("");
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
   const [manualEmail, setManualEmail] = useState("");
@@ -180,6 +181,7 @@ export default function Meetings() {
     setDescription("");
     setMeetingDate("");
     setLocation("");
+    setCustomMeetLink("");
     setParticipants("");
     setSelectedParticipants([]);
     setManualEmail("");
@@ -197,6 +199,7 @@ export default function Meetings() {
       description,
       meetingDate: new Date(meetingDate),
       location,
+      customMeetLink: customMeetLink || undefined,
       participants: selectedParticipants.length > 0 ? selectedParticipants : undefined,
     });
   };
@@ -286,6 +289,19 @@ export default function Meetings() {
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Conference Room A"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="customMeetLink" className="text-foreground">Video Meeting Link (Optional)</Label>
+                  <Input
+                    id="customMeetLink"
+                    type="url"
+                    value={customMeetLink}
+                    onChange={(e) => setCustomMeetLink(e.target.value)}
+                    placeholder="https://meet.google.com/xxx-yyyy-zzz or Zoom/Teams link"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Leave empty to auto-generate a Jitsi Meet link
+                  </p>
                 </div>
                 <div>
                   <Label className="text-foreground">Participants</Label>

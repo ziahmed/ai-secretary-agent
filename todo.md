@@ -344,3 +344,10 @@
 - [x] Add better error handling with try-catch and clear error messages
 - [x] Optimize transcript processing for large files (limit to 15000 chars)
 - [x] Test with sample transcript to verify improvements
+
+## Custom Meeting Link Input
+- [x] Add optional meeting link input field to meeting creation form
+- [x] Update backend create meeting procedure to accept customMeetLink
+- [x] If custom link provided, use it instead of auto-generating Jitsi link
+- [x] Added help text explaining auto-generation if left empty
+- [x] Test with Google Meet, Zoom, Teams links

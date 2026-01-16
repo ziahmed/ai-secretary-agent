@@ -47,6 +47,7 @@ export const appRouter = router({
         meetingDate: z.date(),
         duration: z.number().optional(),
         location: z.string().optional(),
+        customMeetLink: z.string().optional(),
         participants: z.array(z.string()).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -56,9 +57,12 @@ export const appRouter = router({
           input.duration || 60
         );
         
-        // Generate a unique Jitsi Meet link
-        const meetingCode = Math.random().toString(36).substring(2, 15).replace(/[^a-z0-9]/g, '');
-        const meetLink = `https://meet.jit.si/${meetingCode}`;
+        // Use custom link if provided, otherwise generate a unique Jitsi Meet link
+        let meetLink = input.customMeetLink;
+        if (!meetLink) {
+          const meetingCode = Math.random().toString(36).substring(2, 15).replace(/[^a-z0-9]/g, '');
+          meetLink = `https://meet.jit.si/${meetingCode}`;
+        }
         
         const meeting = await db.createMeeting({
           ...input,
