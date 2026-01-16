@@ -380,3 +380,10 @@
 - [x] Remove videoConferenceLeft event handler to prevent unwanted navigation
 - [x] Users can now interact with all Jitsi features (login, settings, etc.) without being kicked out
 - [ ] Test in browser to verify fix works correctly
+
+## Jitsi Meeting Duration Fix
+- [x] Remove 5-minute demo limitation from embedded Jitsi
+- [x] Switch from External API to direct iframe embedding
+- [x] Configure proper Jitsi parameters for unlimited free usage (prejoinPageEnabled=false, disableDeepLinking=true)
+- [x] Simplified implementation with standard iframe (no External API dependency)
+- [ ] Test meeting duration beyond 5 minutes in browser
