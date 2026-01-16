@@ -377,3 +377,12 @@
 - [x] Return proper error when meeting doesn't exist (throws error with message)
 - [x] MeetingRoom component already handles null meeting gracefully
 - [x] Shows user-friendly "Meeting not found" message with back button
+
+## Debug Persistent JaaS Authentication Failure
+- [x] Check server logs for JWT payload being generated
+- [x] Compare generated JWT with working example from user's sample code
+- [x] Decoded sample JWT to see expected structure
+- [x] Found API key ID mismatch: using 9039d3 but dashboard shows a8272e
+- [x] Update JAAS_API_KEY environment variable to correct value (a8272e)
+- [x] JWT now generates with correct kid: vpaas-magic-cookie-5dda5ad5e0a84ab3836b4d6cb3f95000/a8272e
+- [ ] Test authentication in browser with corrected API key
