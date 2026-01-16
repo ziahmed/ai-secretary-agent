@@ -347,3 +347,10 @@
 - [x] Update button text from "Generate Meet Link" to "Create Video Room"
 - [x] Update toast messages to reflect Jitsi instead of Google Meet
 - [ ] Test Jitsi meeting creation and joining flow in browser
+
+## Fix JaaS JWT Authentication Error
+- [x] Debug JWT token generation failure (jwt.sign not a function)
+- [x] Fix jsonwebtoken import to use proper CommonJS import
+- [x] Add error logging for better debugging
+- [x] Add try-catch around JWT signing with detailed error messages
+- [ ] Test token generation works in browser

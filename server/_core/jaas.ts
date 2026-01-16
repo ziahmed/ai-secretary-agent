@@ -1,4 +1,5 @@
 import { ENV } from './env';
+import jwt from 'jsonwebtoken';
 
 interface JaaSTokenOptions {
   roomName: string;
@@ -30,14 +31,19 @@ export async function generateJaaSToken(options: JaaSTokenOptions): Promise<stri
 
   // Validate required environment variables
   if (!ENV.jaasAppId) {
+    console.error('[JaaS] JAAS_APP_ID is not configured');
     throw new Error('JAAS_APP_ID is not configured');
   }
   if (!ENV.jaasApiKey) {
+    console.error('[JaaS] JAAS_API_KEY is not configured');
     throw new Error('JAAS_API_KEY is not configured');
   }
   if (!ENV.jaasPrivateKey) {
+    console.error('[JaaS] JAAS_PRIVATE_KEY is not configured');
     throw new Error('JAAS_PRIVATE_KEY is not configured');
   }
+  
+  console.log('[JaaS] Generating token for room:', roomName);
 
   const now = Math.floor(Date.now() / 1000);
   const exp = now + expiresIn;
@@ -81,7 +87,6 @@ export async function generateJaaSToken(options: JaaSTokenOptions): Promise<stri
   };
 
   // Use jsonwebtoken library for signing
-  const jwt = await import('jsonwebtoken');
   
   // Format private key (handle both single-line and multi-line formats)
   let privateKey = ENV.jaasPrivateKey;
@@ -103,12 +108,18 @@ export async function generateJaaSToken(options: JaaSTokenOptions): Promise<stri
     }
   }
 
-  const token = jwt.sign(payload, privateKey, {
-    algorithm: 'RS256',
-    header: header,
-  });
-
-  return token;
+  try {
+    const token = jwt.sign(payload, privateKey, {
+      algorithm: 'RS256',
+      header: header,
+    });
+    
+    console.log('[JaaS] Token generated successfully');
+    return token;
+  } catch (error) {
+    console.error('[JaaS] Failed to sign JWT token:', error);
+    throw new Error(`Failed to generate JaaS token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**

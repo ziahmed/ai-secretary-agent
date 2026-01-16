@@ -29,6 +29,15 @@ export default function JitsiMeet({
     roomName,
     enableRecording: true,
   });
+  
+  // Handle token fetch error
+  useEffect(() => {
+    if (tokenError) {
+      console.error('[JitsiMeet] Token fetch error:', tokenError);
+      setError(`Failed to authenticate with video service: ${tokenError.message}`);
+      setIsLoading(false);
+    }
+  }, [tokenError]);
 
   // Load JaaS External API script once
   useEffect(() => {
