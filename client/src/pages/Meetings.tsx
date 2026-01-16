@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Calendar, Plus, FileText, Mail, ArrowLeft, X, CalendarClock, Upload, ExternalLink, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Meetings() {
+  const [, navigate] = useLocation();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -121,7 +123,7 @@ export default function Meetings() {
   const generateMeetLinkMutation = trpc.meetings.generateMeetLink.useMutation({
     onSuccess: (data) => {
       utils.meetings.list.invalidate();
-      toast.success("Google Meet link generated successfully");
+      toast.success("Jitsi meeting room created successfully");
     },
     onError: (error) => {
       toast.error(error.message || "Failed to generate meet link");
@@ -475,14 +477,12 @@ export default function Meetings() {
                   {meeting.meetLink && (
                     <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <p className="text-sm font-medium text-blue-800 mb-2">Video Conference</p>
-                      <a 
-                        href={meeting.meetLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
+                      <Button
+                        onClick={() => navigate(`/meeting-room/${meeting.id}`)}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
                       >
-                        🎥 Join Google Meet
-                      </a>
+                        🎥 Join Video Call
+                      </Button>
                     </div>
                   )}
 
@@ -509,7 +509,7 @@ export default function Meetings() {
                           onClick={() => generateMeetLinkMutation.mutate({ id: meeting.id })}
                           disabled={generateMeetLinkMutation.isPending}
                         >
-                          🎥 Generate Meet Link
+                          🎥 Create Video Room
                         </Button>
                       )}
                       <Button

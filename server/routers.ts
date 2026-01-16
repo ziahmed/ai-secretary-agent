@@ -234,11 +234,11 @@ export const appRouter = router({
           throw new Error('Meeting not found');
         }
         
-        // Generate a unique Google Meet-style link
-        const meetingCode = Math.random().toString(36).substring(2, 12);
-        const meetLink = `https://meet.google.com/${meetingCode}`;
+        // Generate a unique Jitsi room code
+        const meetingCode = Math.random().toString(36).substring(2, 15).toUpperCase();
+        const meetLink = `jitsi:${meetingCode}`;
         
-        // Update meeting with new meet link
+        // Update meeting with new Jitsi room code
         await db.updateMeeting(input.id, { meetLink });
         
         return { meetLink };

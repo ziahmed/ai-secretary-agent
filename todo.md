@@ -339,3 +339,11 @@
 - [x] Registered /meeting-room/:id route in App.tsx
 - [x] Added jaas router to routers.ts
 - [ ] Test route navigation works correctly in browser
+
+## Replace Google Meet with Jitsi
+- [x] Update meeting creation to generate Jitsi room codes instead of Google Meet links
+- [x] Update Meetings page UI to show "Join Video Call" button that navigates to meeting room
+- [x] Replace Google Meet external links with in-app Jitsi navigation
+- [x] Update button text from "Generate Meet Link" to "Create Video Room"
+- [x] Update toast messages to reflect Jitsi instead of Google Meet
+- [ ] Test Jitsi meeting creation and joining flow in browser
