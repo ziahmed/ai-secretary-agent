@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 interface JitsiMeetProps {
   roomName: string;
   displayName?: string;
-  onMeetingEnd?: () => void;
   onRecordingStatusChanged?: (recording: boolean) => void;
 }
 
@@ -16,7 +15,6 @@ declare global {
 export default function JitsiMeet({ 
   roomName, 
   displayName = 'Guest',
-  onMeetingEnd,
   onRecordingStatusChanged 
 }: JitsiMeetProps) {
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
@@ -91,10 +89,11 @@ export default function JitsiMeet({
     jitsiApiRef.current = new window.JitsiMeetExternalAPI(domain, options);
 
     // Event listeners
-    jitsiApiRef.current.addListener('videoConferenceLeft', () => {
-      if (onMeetingEnd) {
-        onMeetingEnd();
-      }
+    // Note: videoConferenceLeft fires for many internal Jitsi actions (login, settings, etc.)
+    // We don't automatically navigate away to prevent interrupting user interactions
+    // Users can use the Back button in the header to leave the meeting
+    jitsiApiRef.current.addListener('videoConferenceJoined', () => {
+      console.log('User joined the conference');
     });
 
     jitsiApiRef.current.addListener('recordingStatusChanged', (event: any) => {

@@ -374,3 +374,9 @@
 - [x] Write and run comprehensive unit tests for webhook functionality
 - [x] All 8 tests passing (meeting lookup, error handling, validation)
 - [ ] Test end-to-end workflow with actual Jibri recording (requires Jibri server setup)
+
+## Bug Fixes - Jitsi Meeting Room
+- [x] Fix Jitsi "Log-in" button triggering meeting end navigation
+- [x] Remove videoConferenceLeft event handler to prevent unwanted navigation
+- [x] Users can now interact with all Jitsi features (login, settings, etc.) without being kicked out
+- [ ] Test in browser to verify fix works correctly

@@ -20,11 +20,6 @@ export default function MeetingRoom() {
     { enabled: !!meetingId }
   );
 
-  const handleMeetingEnd = () => {
-    toast.success('Meeting ended');
-    setLocation('/meetings');
-  };
-
   const handleRecordingStatusChanged = (recording: boolean) => {
     setIsRecording(recording);
     if (recording) {
@@ -108,7 +103,6 @@ export default function MeetingRoom() {
         <JitsiMeet
           roomName={roomCode}
           displayName={authUser?.name || authUser?.email || 'Guest'}
-          onMeetingEnd={handleMeetingEnd}
           onRecordingStatusChanged={handleRecordingStatusChanged}
         />
       </div>
