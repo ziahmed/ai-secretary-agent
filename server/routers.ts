@@ -7,7 +7,7 @@ import { invokeLLM } from "./_core/llm";
 import { storagePut } from "./storage";
 import * as db from "./db";
 import { sendMeetingInvite, sendMeetingCancellation } from "./emailService";
-import { webhookRouter } from "./routers/webhook";
+import { generateJaaSToken, getJaaSConfig } from "./_core/jaas";
 
 export const appRouter = router({
   system: systemRouter,
@@ -19,6 +19,13 @@ export const appRouter = router({
       return {
         success: true,
       } as const;
+    }),
+  }),
+
+  // ============= User Management =============
+  users: router({
+    list: protectedProcedure.query(async () => {
+      return await db.getAllUsers();
     }),
   }),
 
@@ -41,7 +48,6 @@ export const appRouter = router({
         meetingDate: z.date(),
         duration: z.number().optional(),
         location: z.string().optional(),
-        customMeetLink: z.string().optional(),
         participants: z.array(z.string()).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -51,12 +57,9 @@ export const appRouter = router({
           input.duration || 60
         );
         
-        // Use custom link if provided, otherwise generate a unique Jitsi Meet link
-        let meetLink = input.customMeetLink;
-        if (!meetLink) {
-          const meetingCode = Math.random().toString(36).substring(2, 15).replace(/[^a-z0-9]/g, '');
-          meetLink = `https://meet.jit.si/${meetingCode}`;
-        }
+        // Generate a unique Google Meet-style link
+        const meetingCode = Math.random().toString(36).substring(2, 12);
+        const meetLink = `https://meet.google.com/${meetingCode}`;
         
         const meeting = await db.createMeeting({
           ...input,
@@ -231,9 +234,9 @@ export const appRouter = router({
           throw new Error('Meeting not found');
         }
         
-        // Generate a unique Jitsi Meet link
-        const meetingCode = Math.random().toString(36).substring(2, 15).replace(/[^a-z0-9]/g, '');
-        const meetLink = `https://meet.jit.si/${meetingCode}`;
+        // Generate a unique Google Meet-style link
+        const meetingCode = Math.random().toString(36).substring(2, 12);
+        const meetLink = `https://meet.google.com/${meetingCode}`;
         
         // Update meeting with new meet link
         await db.updateMeeting(input.id, { meetLink });
@@ -302,56 +305,50 @@ export const appRouter = router({
           transcript = await downloadFromGoogleDrive(meeting.transcriptUrl);
         }
 
-        // Generate meeting summary using LLM with error handling
-        let summary: string;
-        try {
-          const response = await invokeLLM({
-            messages: [
-              {
-                role: "system",
-                content: "You are an expert meeting secretary. Create concise, actionable summaries in markdown format."
-              },
-              {
-                role: "user",
-                content: `Summarize this meeting transcript in markdown format with these sections:
+        // Generate meeting summary using LLM
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: "You are an AI secretary assistant. Generate a well-formatted, professional meeting summary that is easy to read and understand. Use clear headings, bullet points, and proper spacing."
+            },
+            {
+              role: "user",
+              content: `Please create a comprehensive, well-formatted summary of this meeting transcript.
 
-# Meeting Summary
+Format the summary with clear sections:
 
-## Overview
-(2-3 sentences about meeting purpose and outcome)
+# MEETING SUMMARY
+
+## Meeting Overview
+[Brief overview of the meeting purpose and context]
 
 ## Attendees
-(Bullet list)
+[List of participants]
 
-## Key Points
-(3-5 main discussion topics)
+## Key Discussion Points
+[Main topics discussed with bullet points]
 
-## Decisions
-(Clear decisions made)
+## Decisions Made
+[Important decisions with bullet points]
 
 ## Action Items
-(Format: "- [Task] - Owner: [Name] - Deadline: [Date]")
+[List of action items with owners and deadlines]
 
 ## Next Steps
-(What happens next)
+[What happens next]
+
+---
 
 Transcript:
-${transcript.slice(0, 15000)}`
-              }
-            ]
-          });
-          
-          summary = (typeof response.choices[0]?.message?.content === 'string'
-            ? response.choices[0]?.message?.content
-            : "");
-            
-          if (!summary) {
-            throw new Error('LLM returned empty summary');
-          }
-        } catch (error) {
-          console.error('LLM summary generation failed:', error);
-          throw new Error('Failed to generate summary. Please try again.');
-        }
+${transcript}`
+            }
+          ]
+        });
+
+        const summary = (typeof response.choices[0]?.message?.content === 'string'
+          ? response.choices[0]?.message?.content
+          : "");
 
         // Upload summary to Google Drive in same folder as transcript
         const { uploadToGoogleDrive } = await import('./googleApi');
@@ -549,39 +546,10 @@ ${transcript}`
       }),
   }),
 
-  // ============= JaaS (Jitsi as a Service) =============
-  jaas: router({
-    getToken: protectedProcedure
-      .input(z.object({
-        roomName: z.string(),
-        enableRecording: z.boolean().optional(),
-      }))
-      .query(async ({ input, ctx }) => {
-        const { generateJaaSToken, getJaaSConfig } = await import('./_core/jaas');
-        
-        const token = await generateJaaSToken({
-          roomName: input.roomName,
-          userName: ctx.user?.name || ctx.user?.email || 'Guest',
-          userEmail: ctx.user?.email || '',
-          userId: ctx.user?.openId || '',
-          moderator: true,
-          enableRecording: input.enableRecording ?? true,
-          enableTranscription: false,
-        });
-
-        const config = getJaaSConfig();
-
-        return {
-          token,
-          config,
-        };
-      }),
-  }),
-
-  // ============= User Management =============
-  users: router({
+  // ============= Task Management =============
+  tasks: router({
     list: protectedProcedure.query(async () => {
-      return await db.getAllUsers();
+      return await db.getAllTasks();
     }),
 
     getById: protectedProcedure
@@ -1335,8 +1303,29 @@ Priority: ${task.priority}`
       }),
   }),
 
-  // ============= Webhooks =============
-  webhook: webhookRouter,
+  // ============= JaaS (Jitsi as a Service) =============
+  jaas: router({
+    getToken: protectedProcedure
+      .input(z.object({
+        roomName: z.string(),
+        enableRecording: z.boolean().optional().default(true),
+      }))
+      .query(async ({ ctx, input }) => {
+        const token = await generateJaaSToken({
+          roomName: input.roomName,
+          userName: ctx.user?.name || 'Guest',
+          userEmail: ctx.user?.email || undefined,
+          userId: ctx.user?.openId || undefined,
+          moderator: true,
+          enableRecording: input.enableRecording,
+        });
+
+        return {
+          token,
+          config: getJaaSConfig(),
+        };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

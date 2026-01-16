@@ -1,13 +1,6 @@
-/**
- * JaaS (Jitsi as a Service) JWT token generation
- * 
- * Generates JWT tokens for authenticating with JaaS and enabling premium features
- * like recording, transcription, and outbound calls.
- */
+import { ENV } from './env';
 
-import { ENV } from "./env";
-
-export type JaaSTokenOptions = {
+interface JaaSTokenOptions {
   roomName: string;
   userName?: string;
   userEmail?: string;
@@ -15,27 +8,27 @@ export type JaaSTokenOptions = {
   moderator?: boolean;
   enableRecording?: boolean;
   enableTranscription?: boolean;
-  expiresIn?: number; // in seconds, default 7200 (2 hours)
-};
+  expiresIn?: number; // seconds, default 7200 (2 hours)
+}
 
 /**
- * Generate a JWT token for JaaS authentication
- * 
- * @param options - Token configuration options
+ * Generate a JWT token for JaaS (Jitsi as a Service)
+ * @param options Token generation options
  * @returns JWT token string
  */
 export async function generateJaaSToken(options: JaaSTokenOptions): Promise<string> {
   const {
     roomName,
     userName = 'Guest',
-    userEmail = '',
-    userId = '',
+    userEmail,
+    userId,
     moderator = true,
     enableRecording = true,
     enableTranscription = false,
     expiresIn = 7200, // 2 hours default
   } = options;
 
+  // Validate required environment variables
   if (!ENV.jaasAppId) {
     throw new Error('JAAS_APP_ID is not configured');
   }
@@ -49,22 +42,30 @@ export async function generateJaaSToken(options: JaaSTokenOptions): Promise<stri
   const now = Math.floor(Date.now() / 1000);
   const exp = now + expiresIn;
 
-  // JWT Header
+  // JWT header
   const header = {
-    kid: `${ENV.jaasAppId}/${ENV.jaasApiKey}`,
-    typ: 'JWT',
     alg: 'RS256',
+    typ: 'JWT',
+    kid: `${ENV.jaasAppId}/${ENV.jaasApiKey}`,
   };
 
-  // JWT Payload
+  // JWT payload
   const payload = {
     aud: 'jitsi',
     iss: 'chat',
     iat: now,
     exp: exp,
-    nbf: now - 5, // 5 seconds before to account for clock skew
+    nbf: now - 5, // Not before: 5 seconds ago to account for clock skew
     sub: ENV.jaasAppId,
     context: {
+      user: {
+        'hidden-from-recorder': false,
+        moderator: moderator,
+        name: userName,
+        id: userId || `user-${now}`,
+        avatar: '',
+        email: userEmail || '',
+      },
       features: {
         livestreaming: false,
         'file-upload': false,
@@ -74,14 +75,6 @@ export async function generateJaaSToken(options: JaaSTokenOptions): Promise<stri
         'list-visitors': false,
         recording: enableRecording,
         flip: false,
-      },
-      user: {
-        'hidden-from-recorder': false,
-        moderator: moderator,
-        name: userName,
-        id: userId || `user-${now}`,
-        avatar: '',
-        email: userEmail,
       },
     },
     room: roomName,
@@ -119,7 +112,8 @@ export async function generateJaaSToken(options: JaaSTokenOptions): Promise<stri
 }
 
 /**
- * Get JaaS configuration for frontend
+ * Get JaaS configuration
+ * @returns JaaS config object
  */
 export function getJaaSConfig() {
   return {

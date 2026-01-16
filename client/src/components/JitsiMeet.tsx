@@ -22,51 +22,63 @@ export default function JitsiMeet({
   const jitsiApiRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const scriptLoadedRef = useRef(false);
 
-  // Get JaaS token from backend
-  const { data: jaasData, isLoading: isLoadingToken } = trpc.jaas.getToken.useQuery({
+  // Fetch JaaS token (happens in parallel with script loading)
+  const { data: jaasData, isLoading: isLoadingToken, error: tokenError } = trpc.jaas.getToken.useQuery({
     roomName,
     enableRecording: true,
   });
 
+  // Load JaaS External API script once
   useEffect(() => {
-    if (!jaasData || isLoadingToken) return;
+    if (scriptLoadedRef.current || !jaasData) return;
 
-    const loadJitsiScript = async () => {
-      try {
-        // Load JaaS External API script
-        const script = document.createElement('script');
-        script.src = jaasData.config.scriptUrl;
-        script.async = true;
-        
-        script.onload = () => {
-          initializeJitsi();
-        };
-        
-        script.onerror = () => {
-          setError('Failed to load Jitsi Meet. Please refresh the page.');
-          setIsLoading(false);
-        };
-
-        document.body.appendChild(script);
-
-        return () => {
-          if (jitsiApiRef.current) {
-            jitsiApiRef.current.dispose();
-          }
-          document.body.removeChild(script);
-        };
-      } catch (err) {
-        setError('Failed to initialize video conference.');
-        setIsLoading(false);
+    const existingScript = document.querySelector(`script[src="${jaasData.config.scriptUrl}"]`);
+    if (existingScript) {
+      scriptLoadedRef.current = true;
+      if (window.JitsiMeetExternalAPI) {
+        initializeJitsi();
       }
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = jaasData.config.scriptUrl;
+    script.async = true;
+    
+    script.onload = () => {
+      scriptLoadedRef.current = true;
+      initializeJitsi();
+    };
+    
+    script.onerror = () => {
+      setError('Failed to load Jitsi Meet. Please refresh the page.');
+      setIsLoading(false);
     };
 
-    loadJitsiScript();
-  }, [jaasData, isLoadingToken]);
+    document.body.appendChild(script);
+
+    return () => {
+      if (jitsiApiRef.current) {
+        try {
+          jitsiApiRef.current.dispose();
+        } catch (e) {
+          console.error('Error disposing Jitsi API:', e);
+        }
+      }
+    };
+  }, [jaasData]);
 
   const initializeJitsi = () => {
-    if (!jitsiContainerRef.current || !window.JitsiMeetExternalAPI || !jaasData) return;
+    if (!jitsiContainerRef.current || !window.JitsiMeetExternalAPI || !jaasData) {
+      return;
+    }
+
+    // Prevent double initialization
+    if (jitsiApiRef.current) {
+      return;
+    }
 
     try {
       const options = {
@@ -74,7 +86,7 @@ export default function JitsiMeet({
         width: '100%',
         height: '100%',
         parentNode: jitsiContainerRef.current,
-        jwt: jaasData.token, // JWT token for authentication
+        jwt: jaasData.token,
         userInfo: {
           displayName: displayName
         },
@@ -85,6 +97,10 @@ export default function JitsiMeet({
           fileRecordingsEnabled: true,
           liveStreamingEnabled: false,
           prejoinPageEnabled: false,
+          // Performance optimizations
+          disableDeepLinking: true,
+          enableNoAudioDetection: false,
+          enableNoisyMicDetection: false,
         },
         interfaceConfigOverwrite: {
           TOOLBAR_BUTTONS: [
@@ -105,6 +121,8 @@ export default function JitsiMeet({
             'videobackgroundblur',
             'help',
           ],
+          SHOW_JITSI_WATERMARK: false,
+          SHOW_WATERMARK_FOR_GUESTS: false,
         },
       };
 
@@ -125,6 +143,12 @@ export default function JitsiMeet({
       jitsiApiRef.current.addListener('readyToClose', () => {
         console.log('Conference ended');
       });
+
+      // Set loading to false after a timeout as fallback
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 5000);
+
     } catch (err) {
       console.error('Error initializing Jitsi:', err);
       setError('Failed to start video conference.');
@@ -132,12 +156,28 @@ export default function JitsiMeet({
     }
   };
 
+  if (tokenError) {
+    return (
+      <div className="w-full h-full min-h-[600px] flex items-center justify-center bg-black">
+        <div className="text-center text-white">
+          <p className="text-red-400 mb-4">Failed to authenticate with video service</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoadingToken) {
     return (
       <div className="w-full h-full min-h-[600px] flex items-center justify-center bg-black">
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Preparing video conference...</p>
+          <p>Authenticating...</p>
         </div>
       </div>
     );
@@ -166,6 +206,7 @@ export default function JitsiMeet({
           <div className="text-center text-white">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
             <p>Joining meeting...</p>
+            <p className="text-sm text-gray-400 mt-2">This may take a few moments</p>
           </div>
         </div>
       )}

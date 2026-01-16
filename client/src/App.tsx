@@ -22,6 +22,7 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/meetings"} component={Meetings} />
+      <Route path={"/meeting-room/:id"} component={MeetingRoom} />
       <Route path={"/tasks"} component={Tasks} />
         <Route path="/review" component={ReviewQueue} />
       <Route path="/google-sync" component={GoogleSync} />
@@ -29,7 +30,6 @@ function Router() {
       <Route path="/calendar" component={Calendar} />
       <Route path="/email-tracking" component={EmailTracking} />
       <Route path="/approval-history" component={ApprovalHistory} />
-      <Route path="/meeting-room/:id" component={MeetingRoom} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

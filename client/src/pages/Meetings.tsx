@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { useLocation } from "wouter";
 import { Calendar, Plus, FileText, Mail, ArrowLeft, X, CalendarClock, Upload, ExternalLink, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,9 +15,7 @@ export default function Meetings() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [meetingDate, setMeetingDate] = useState("");
-  const [meetingLocation, setMeetingLocation] = useState("");
-  const [, setLocation] = useLocation();
-  const [customMeetLink, setCustomMeetLink] = useState("");
+  const [location, setLocation] = useState("");
   const [participants, setParticipants] = useState("");
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
   const [manualEmail, setManualEmail] = useState("");
@@ -124,7 +121,7 @@ export default function Meetings() {
   const generateMeetLinkMutation = trpc.meetings.generateMeetLink.useMutation({
     onSuccess: (data) => {
       utils.meetings.list.invalidate();
-      toast.success("Jitsi Meet link generated successfully");
+      toast.success("Google Meet link generated successfully");
     },
     onError: (error) => {
       toast.error(error.message || "Failed to generate meet link");
@@ -183,7 +180,6 @@ export default function Meetings() {
     setDescription("");
     setMeetingDate("");
     setLocation("");
-    setCustomMeetLink("");
     setParticipants("");
     setSelectedParticipants([]);
     setManualEmail("");
@@ -200,8 +196,7 @@ export default function Meetings() {
       title,
       description,
       meetingDate: new Date(meetingDate),
-      location: meetingLocation,
-      customMeetLink: customMeetLink || undefined,
+      location,
       participants: selectedParticipants.length > 0 ? selectedParticipants : undefined,
     });
   };
@@ -287,23 +282,10 @@ export default function Meetings() {
                   <Label htmlFor="location" className="text-foreground">Location</Label>
                   <Input
                     id="location"
-                    value={meetingLocation}
-                    onChange={(e) => setMeetingLocation(e.target.value)}
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
                     placeholder="Conference Room A"
                   />
-                </div>
-                <div>
-                  <Label htmlFor="customMeetLink" className="text-foreground">Video Meeting Link (Optional)</Label>
-                  <Input
-                    id="customMeetLink"
-                    type="url"
-                    value={customMeetLink}
-                    onChange={(e) => setCustomMeetLink(e.target.value)}
-                    placeholder="https://meet.google.com/xxx-yyyy-zzz or Zoom/Teams link"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Leave empty to auto-generate a Jitsi Meet link
-                  </p>
                 </div>
                 <div>
                   <Label className="text-foreground">Participants</Label>
@@ -493,12 +475,14 @@ export default function Meetings() {
                   {meeting.meetLink && (
                     <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <p className="text-sm font-medium text-blue-800 mb-2">Video Conference</p>
-                      <Button
-                        onClick={() => setLocation(`/meeting-room/${meeting.id}`)}
-                        className="inline-flex items-center gap-2"
+                      <a 
+                        href={meeting.meetLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
                       >
-                        🎥 Join Video Call
-                      </Button>
+                        🎥 Join Google Meet
+                      </a>
                     </div>
                   )}
 

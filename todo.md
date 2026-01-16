@@ -330,72 +330,12 @@
 - [x] Add confirmation dialogs before deletion
 - [x] Test delete functionality
 
-## Replace Google Meet with Jitsi Meet
-- [x] Update meeting link generation to use Jitsi Meet format (meet.jit.si)
-- [x] Change UI labels from "Google Meet" to "Video Call"
-- [x] Update email templates to use Jitsi Meet links
-- [x] Update button text and toast messages
-- [x] Test Jitsi Meet links work correctly
-
-## Meeting Summary Generation Issues
-- [x] Investigate why summary generation is not efficient/successful
-- [x] Check error logs for summary generation failures
-- [x] Improve LLM prompt for better summary quality (more concise, clearer structure)
-- [x] Add better error handling with try-catch and clear error messages
-- [x] Optimize transcript processing for large files (limit to 15000 chars)
-- [x] Test with sample transcript to verify improvements
-
-## Custom Meeting Link Input
-- [x] Add optional meeting link input field to meeting creation form
-- [x] Update backend create meeting procedure to accept customMeetLink
-- [x] If custom link provided, use it instead of auto-generating Jitsi link
-- [x] Added help text explaining auto-generation if left empty
-- [x] Test with Google Meet, Zoom, Teams links
-
-## Jitsi Meet Integration with Recording
-- [ ] Create JitsiMeet React component using Jitsi Meet API
-- [ ] Add meeting room page to host embedded Jitsi meetings
-- [ ] Configure Jitsi with recording enabled (Jibri integration)
-- [ ] Add "Join Meeting" button to navigate to embedded Jitsi room
-- [ ] Implement recording start/stop controls
-- [ ] Add webhook/callback to capture recording completion
-- [ ] Automatically download and process recordings for transcripts
-- [ ] Upload processed transcripts to Google Drive
-- [ ] Test complete workflow from meeting to transcript
-
-## Jibri Automatic Recording Processing
-- [x] Create webhook endpoint to receive Jitsi recording completion notifications
-- [x] Implement recording download logic from Jitsi/Jibri storage
-- [x] Integrate speech-to-text transcription service
-- [x] Upload transcripts to Google Drive automatically
-- [x] Link transcripts to meeting records in database
-- [x] Add error handling and retry logic for failed processing
-- [x] Create comprehensive setup documentation (JIBRI_SETUP.md)
-- [x] Write and run comprehensive unit tests for webhook functionality
-- [x] All 8 tests passing (meeting lookup, error handling, validation)
-- [ ] Test end-to-end workflow with actual Jibri recording (requires Jibri server setup)
-
-## Bug Fixes - Jitsi Meeting Room
-- [x] Fix Jitsi "Log-in" button triggering meeting end navigation
-- [x] Remove videoConferenceLeft event handler to prevent unwanted navigation
-- [x] Users can now interact with all Jitsi features (login, settings, etc.) without being kicked out
-- [ ] Test in browser to verify fix works correctly
-
-## Jitsi Meeting Duration Fix
-- [x] Remove 5-minute demo limitation from embedded Jitsi
-- [x] Switch from External API to direct iframe embedding
-- [x] Configure proper Jitsi parameters for unlimited free usage (prejoinPageEnabled=false, disableDeepLinking=true)
-- [x] Simplified implementation with standard iframe (no External API dependency)
-- [ ] Test meeting duration beyond 5 minutes in browser
-
-## JaaS (Jitsi as a Service) Integration
-- [x] Configure JaaS credentials (app ID, domain)
-- [x] Update JitsiMeet component to use JaaS External API with JWT authentication
-- [x] Set up JWT token generation for recording and premium features
-- [x] Store JaaS credentials securely in environment variables
-- [x] Implement tRPC procedure for token generation (jaas.getToken)
-- [x] Add proper private key formatting for RS256 signing
-- [x] Write and pass all 7 JaaS integration tests
-- [ ] Test unlimited meeting duration with JaaS in browser
-- [ ] Test recording functionality with JaaS
-- [ ] Verify recording webhook integration works with JaaS
+## Bug Fix - Meeting Room Route 404
+- [x] Investigate why /meeting-room/:id returns 404
+- [x] Created missing MeetingRoom.tsx component
+- [x] Created missing JitsiMeet.tsx component  
+- [x] Created missing jaas.ts module with JWT generation
+- [x] Added JaaS environment variables to ENV configuration
+- [x] Registered /meeting-room/:id route in App.tsx
+- [x] Added jaas router to routers.ts
+- [ ] Test route navigation works correctly in browser
