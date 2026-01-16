@@ -7,4 +7,7 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  jaasAppId: process.env.JAAS_APP_ID ?? "",
+  jaasApiKey: process.env.JAAS_API_KEY ?? "",
+  jaasPrivateKey: process.env.JAAS_PRIVATE_KEY ?? "",
 };

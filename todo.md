@@ -387,3 +387,15 @@
 - [x] Configure proper Jitsi parameters for unlimited free usage (prejoinPageEnabled=false, disableDeepLinking=true)
 - [x] Simplified implementation with standard iframe (no External API dependency)
 - [ ] Test meeting duration beyond 5 minutes in browser
+
+## JaaS (Jitsi as a Service) Integration
+- [x] Configure JaaS credentials (app ID, domain)
+- [x] Update JitsiMeet component to use JaaS External API with JWT authentication
+- [x] Set up JWT token generation for recording and premium features
+- [x] Store JaaS credentials securely in environment variables
+- [x] Implement tRPC procedure for token generation (jaas.getToken)
+- [x] Add proper private key formatting for RS256 signing
+- [x] Write and pass all 7 JaaS integration tests
+- [ ] Test unlimited meeting duration with JaaS in browser
+- [ ] Test recording functionality with JaaS
+- [ ] Verify recording webhook integration works with JaaS

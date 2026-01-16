@@ -22,13 +22,6 @@ export const appRouter = router({
     }),
   }),
 
-  // ============= User Management =============
-  users: router({
-    list: protectedProcedure.query(async () => {
-      return await db.getAllUsers();
-    }),
-  }),
-
   // ============= Meeting Management =============
   meetings: router({
     list: protectedProcedure.query(async ({ ctx }) => {
@@ -556,10 +549,39 @@ ${transcript}`
       }),
   }),
 
-  // ============= Task Management =============
-  tasks: router({
+  // ============= JaaS (Jitsi as a Service) =============
+  jaas: router({
+    getToken: protectedProcedure
+      .input(z.object({
+        roomName: z.string(),
+        enableRecording: z.boolean().optional(),
+      }))
+      .query(async ({ input, ctx }) => {
+        const { generateJaaSToken, getJaaSConfig } = await import('./_core/jaas');
+        
+        const token = await generateJaaSToken({
+          roomName: input.roomName,
+          userName: ctx.user?.name || ctx.user?.email || 'Guest',
+          userEmail: ctx.user?.email || '',
+          userId: ctx.user?.openId || '',
+          moderator: true,
+          enableRecording: input.enableRecording ?? true,
+          enableTranscription: false,
+        });
+
+        const config = getJaaSConfig();
+
+        return {
+          token,
+          config,
+        };
+      }),
+  }),
+
+  // ============= User Management =============
+  users: router({
     list: protectedProcedure.query(async () => {
-      return await db.getAllTasks();
+      return await db.getAllUsers();
     }),
 
     getById: protectedProcedure
