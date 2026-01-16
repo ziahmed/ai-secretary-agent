@@ -44,6 +44,8 @@ export async function generateJaaSToken(options: JaaSTokenOptions): Promise<stri
   }
   
   console.log('[JaaS] Generating token for room:', roomName);
+  console.log('[JaaS] App ID:', ENV.jaasAppId);
+  console.log('[JaaS] API Key:', ENV.jaasApiKey);
 
   const now = Math.floor(Date.now() / 1000);
   const exp = now + expiresIn;
@@ -83,7 +85,7 @@ export async function generateJaaSToken(options: JaaSTokenOptions): Promise<stri
         flip: false,
       },
     },
-    room: roomName,
+    room: '*', // Wildcard allows access to all rooms
   };
 
   // Use jsonwebtoken library for signing
@@ -115,6 +117,8 @@ export async function generateJaaSToken(options: JaaSTokenOptions): Promise<stri
     });
     
     console.log('[JaaS] Token generated successfully');
+    console.log('[JaaS] Token payload:', JSON.stringify(payload, null, 2));
+    console.log('[JaaS] Token header:', JSON.stringify(header, null, 2));
     return token;
   } catch (error) {
     console.error('[JaaS] Failed to sign JWT token:', error);

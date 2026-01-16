@@ -361,3 +361,13 @@
 - [x] Remove footer tip that was taking up space
 - [x] Reduce header padding for more video space
 - [ ] Test full-screen video conference display in browser
+
+## Fix JaaS Authentication Rejection
+- [x] Debug JWT payload structure - token generates but JaaS rejects it
+- [x] Fixed kid format in JWT header (was using public key instead of API key ID)
+- [x] Updated JAAS_API_KEY to use correct API key ID (9039d3)
+- [x] Changed room field to wildcard '*' for universal access
+- [x] Verified JWT claims match JaaS expectations (aud, iss, sub, context)
+- [x] Added comprehensive logging for JWT payload and header
+- [x] Created integration test to validate JWT structure
+- [ ] Test authentication works in browser
