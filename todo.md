@@ -362,3 +362,15 @@
 - [ ] Automatically download and process recordings for transcripts
 - [ ] Upload processed transcripts to Google Drive
 - [ ] Test complete workflow from meeting to transcript
+
+## Jibri Automatic Recording Processing
+- [x] Create webhook endpoint to receive Jitsi recording completion notifications
+- [x] Implement recording download logic from Jitsi/Jibri storage
+- [x] Integrate speech-to-text transcription service
+- [x] Upload transcripts to Google Drive automatically
+- [x] Link transcripts to meeting records in database
+- [x] Add error handling and retry logic for failed processing
+- [x] Create comprehensive setup documentation (JIBRI_SETUP.md)
+- [x] Write and run comprehensive unit tests for webhook functionality
+- [x] All 8 tests passing (meeting lookup, error handling, validation)
+- [ ] Test end-to-end workflow with actual Jibri recording (requires Jibri server setup)

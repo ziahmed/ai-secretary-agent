@@ -1,4 +1,4 @@
-import { eq, desc, and, or, lt, gte, sql, ne } from "drizzle-orm";
+import { eq, desc, and, or, lt, gte, sql, ne, like } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users, 
@@ -146,6 +146,14 @@ export async function getMeetingByExternalId(externalId: string) {
   const db = await getDb();
   if (!db) return undefined;
   const result = await db.select().from(meetings).where(eq(meetings.externalId, externalId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getMeetingByRoomCode(roomCode: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  // Room code is extracted from meetLink (e.g., meet.jit.si/RoomCode)
+  const result = await db.select().from(meetings).where(like(meetings.meetLink, `%${roomCode}%`)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 

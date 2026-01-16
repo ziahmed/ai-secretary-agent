@@ -7,6 +7,7 @@ import { invokeLLM } from "./_core/llm";
 import { storagePut } from "./storage";
 import * as db from "./db";
 import { sendMeetingInvite, sendMeetingCancellation } from "./emailService";
+import { webhookRouter } from "./routers/webhook";
 
 export const appRouter = router({
   system: systemRouter,
@@ -1311,6 +1312,9 @@ Priority: ${task.priority}`
         return { success: true };
       }),
   }),
+
+  // ============= Webhooks =============
+  webhook: webhookRouter,
 });
 
 export type AppRouter = typeof appRouter;
