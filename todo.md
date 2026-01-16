@@ -336,3 +336,11 @@
 - [x] Update email templates to use Jitsi Meet links
 - [x] Update button text and toast messages
 - [x] Test Jitsi Meet links work correctly
+
+## Meeting Summary Generation Issues
+- [x] Investigate why summary generation is not efficient/successful
+- [x] Check error logs for summary generation failures
+- [x] Improve LLM prompt for better summary quality (more concise, clearer structure)
+- [x] Add better error handling with try-catch and clear error messages
+- [x] Optimize transcript processing for large files (limit to 15000 chars)
+- [x] Test with sample transcript to verify improvements

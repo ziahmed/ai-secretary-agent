@@ -304,50 +304,56 @@ export const appRouter = router({
           transcript = await downloadFromGoogleDrive(meeting.transcriptUrl);
         }
 
-        // Generate meeting summary using LLM
-        const response = await invokeLLM({
-          messages: [
-            {
-              role: "system",
-              content: "You are an AI secretary assistant. Generate a well-formatted, professional meeting summary that is easy to read and understand. Use clear headings, bullet points, and proper spacing."
-            },
-            {
-              role: "user",
-              content: `Please create a comprehensive, well-formatted summary of this meeting transcript.
+        // Generate meeting summary using LLM with error handling
+        let summary: string;
+        try {
+          const response = await invokeLLM({
+            messages: [
+              {
+                role: "system",
+                content: "You are an expert meeting secretary. Create concise, actionable summaries in markdown format."
+              },
+              {
+                role: "user",
+                content: `Summarize this meeting transcript in markdown format with these sections:
 
-Format the summary with clear sections:
+# Meeting Summary
 
-# MEETING SUMMARY
-
-## Meeting Overview
-[Brief overview of the meeting purpose and context]
+## Overview
+(2-3 sentences about meeting purpose and outcome)
 
 ## Attendees
-[List of participants]
+(Bullet list)
 
-## Key Discussion Points
-[Main topics discussed with bullet points]
+## Key Points
+(3-5 main discussion topics)
 
-## Decisions Made
-[Important decisions with bullet points]
+## Decisions
+(Clear decisions made)
 
 ## Action Items
-[List of action items with owners and deadlines]
+(Format: "- [Task] - Owner: [Name] - Deadline: [Date]")
 
 ## Next Steps
-[What happens next]
-
----
+(What happens next)
 
 Transcript:
-${transcript}`
-            }
-          ]
-        });
-
-        const summary = (typeof response.choices[0]?.message?.content === 'string'
-          ? response.choices[0]?.message?.content
-          : "");
+${transcript.slice(0, 15000)}`
+              }
+            ]
+          });
+          
+          summary = (typeof response.choices[0]?.message?.content === 'string'
+            ? response.choices[0]?.message?.content
+            : "");
+            
+          if (!summary) {
+            throw new Error('LLM returned empty summary');
+          }
+        } catch (error) {
+          console.error('LLM summary generation failed:', error);
+          throw new Error('Failed to generate summary. Please try again.');
+        }
 
         // Upload summary to Google Drive in same folder as transcript
         const { uploadToGoogleDrive } = await import('./googleApi');
