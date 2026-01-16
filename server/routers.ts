@@ -38,7 +38,11 @@ export const appRouter = router({
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
-        return await db.getMeetingById(input.id);
+        const meeting = await db.getMeetingById(input.id);
+        if (!meeting) {
+          throw new Error(`Meeting with ID ${input.id} not found`);
+        }
+        return meeting;
       }),
 
     create: protectedProcedure
