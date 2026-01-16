@@ -209,7 +209,7 @@ export default function JitsiMeet({
   }
 
   return (
-    <div className="w-full h-full min-h-[600px] relative">
+    <div className="w-full h-full relative">
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
           <div className="text-center text-white">
@@ -219,7 +219,7 @@ export default function JitsiMeet({
           </div>
         </div>
       )}
-      <div ref={jitsiContainerRef} className="w-full h-full" />
+      <div ref={jitsiContainerRef} className="w-full h-full absolute inset-0" />
     </div>
   );
 }

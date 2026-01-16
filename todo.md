@@ -354,3 +354,10 @@
 - [x] Add error logging for better debugging
 - [x] Add try-catch around JWT signing with detailed error messages
 - [ ] Test token generation works in browser
+
+## Fix Compressed Meeting Screen Size
+- [x] Update MeetingRoom layout to use full viewport height (h-screen with overflow-hidden)
+- [x] Fix Jitsi iframe sizing to fill available space (absolute positioning with inset-0)
+- [x] Remove footer tip that was taking up space
+- [x] Reduce header padding for more video space
+- [ ] Test full-screen video conference display in browser

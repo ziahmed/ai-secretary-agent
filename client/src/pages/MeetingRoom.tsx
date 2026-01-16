@@ -56,9 +56,9 @@ export default function MeetingRoom() {
   const roomCode = extractRoomCode(meeting.meetLink || '');
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="h-screen bg-black flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-gray-900 border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+      <div className="bg-gray-900 border-b border-gray-800 px-4 py-2 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -91,20 +91,13 @@ export default function MeetingRoom() {
         )}
       </div>
 
-      {/* Jitsi Meet Container */}
-      <div className="flex-1">
+      {/* Jitsi Meet Container - Takes remaining space */}
+      <div className="flex-1 overflow-hidden">
         <JitsiMeet
           roomName={roomCode}
           displayName="User"
           onRecordingStatusChanged={setIsRecording}
         />
-      </div>
-
-      {/* Footer Tip */}
-      <div className="bg-gray-900 border-t border-gray-800 px-4 py-2 text-center">
-        <p className="text-gray-400 text-sm">
-          💡 Tip: Click the record button in the toolbar to capture meeting transcripts automatically
-        </p>
       </div>
     </div>
   );
