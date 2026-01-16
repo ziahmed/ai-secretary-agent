@@ -2,13 +2,16 @@ import { useParams, useLocation } from 'wouter';
 import { trpc } from '@/lib/trpc';
 import JitsiMeet from '@/components/JitsiMeet';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
+import { AudioRecorder } from '@/components/AudioRecorder';
+import { toast } from 'sonner';
 
 export default function MeetingRoom() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const [isRecording, setIsRecording] = useState(false);
+  const [showRecorder, setShowRecorder] = useState(false);
 
   // Fetch meeting details
   const { data: meeting, isLoading, error } = trpc.meetings.getById.useQuery(
@@ -91,13 +94,52 @@ export default function MeetingRoom() {
         )}
       </div>
 
-      {/* Jitsi Meet Container - Takes remaining space */}
-      <div className="flex-1 overflow-hidden">
-        <JitsiMeet
-          roomName={roomCode}
-          displayName="User"
-          onRecordingStatusChanged={setIsRecording}
-        />
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-hidden flex">
+        {/* Jitsi Meet Container */}
+        <div className="flex-1 overflow-hidden">
+          <JitsiMeet
+            roomName={roomCode}
+            displayName="User"
+            onRecordingStatusChanged={setIsRecording}
+          />
+        </div>
+
+        {/* Audio Recorder Sidebar */}
+        <div className="flex flex-col bg-gray-900 border-l border-gray-800">
+          {/* Toggle Button */}
+          <button
+            onClick={() => setShowRecorder(!showRecorder)}
+            className="px-4 py-3 text-white hover:bg-gray-800 flex items-center gap-2 border-b border-gray-800"
+          >
+            {showRecorder ? (
+              <>
+                <ChevronUp className="w-4 h-4" />
+                <span className="text-sm font-medium">Hide Recorder</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown className="w-4 h-4" />
+                <span className="text-sm font-medium">Show Recorder</span>
+              </>
+            )}
+          </button>
+
+          {/* Recorder Panel */}
+          {showRecorder && (
+            <div className="w-80 p-4 overflow-y-auto">
+              <AudioRecorder
+                meetingId={parseInt(id || '0')}
+                onTranscriptComplete={(transcript) => {
+                  toast({
+                    title: 'Transcript saved',
+                    description: 'Meeting transcript has been saved successfully',
+                  });
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

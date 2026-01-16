@@ -8,6 +8,7 @@ import { storagePut } from "./storage";
 import * as db from "./db";
 import { sendMeetingInvite, sendMeetingCancellation } from "./emailService";
 import { generateJaaSToken, getJaaSConfig } from "./_core/jaas";
+import { transcribeAudio } from "./_core/voiceTranscription";
 
 export const appRouter = router({
   system: systemRouter,
@@ -1304,6 +1305,95 @@ Priority: ${task.priority}`
       .mutation(async ({ input }) => {
         await db.deleteEmailLog(input.id);
         return { success: true };
+      }),
+  }),
+
+  // ============= Audio Transcription =============
+  transcription: router({
+    // Upload audio file to S3 storage
+    uploadAudio: protectedProcedure
+      .input(z.object({
+        audioData: z.string(), // base64 encoded audio data
+        mimeType: z.string(),
+        meetingId: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        try {
+          // Convert base64 to buffer
+          const audioBuffer = Buffer.from(input.audioData, 'base64');
+          
+          // Check file size (16MB limit for Whisper)
+          const sizeMB = audioBuffer.length / (1024 * 1024);
+          if (sizeMB > 16) {
+            throw new Error(`Audio file too large: ${sizeMB.toFixed(2)}MB. Maximum size is 16MB.`);
+          }
+          
+          // Generate unique filename
+          const timestamp = Date.now();
+          const extension = input.mimeType.split('/')[1] || 'webm';
+          const filename = `meeting-${input.meetingId}-${timestamp}.${extension}`;
+          const fileKey = `recordings/${ctx.user.id}/${filename}`;
+          
+          // Upload to S3
+          const { url } = await storagePut(fileKey, audioBuffer, input.mimeType);
+          
+          console.log(`[Transcription] Audio uploaded to S3: ${url}`);
+          
+          return {
+            success: true,
+            audioUrl: url,
+            fileSize: sizeMB,
+          };
+        } catch (error) {
+          console.error('[Transcription] Upload failed:', error);
+          throw new Error(error instanceof Error ? error.message : 'Failed to upload audio');
+        }
+      }),
+
+    // Transcribe audio using Whisper API
+    transcribe: protectedProcedure
+      .input(z.object({
+        audioUrl: z.string(),
+        meetingId: z.number(),
+        language: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        try {
+          console.log(`[Transcription] Starting transcription for meeting ${input.meetingId}`);
+          
+          // Transcribe using Whisper API
+          const result = await transcribeAudio({
+            audioUrl: input.audioUrl,
+            language: input.language,
+            prompt: 'Transcribe this meeting recording',
+          });
+          
+          // Check if transcription failed
+          if ('error' in result) {
+            console.error('[Transcription] Whisper API error:', result);
+            throw new Error(result.error);
+          }
+          
+          console.log(`[Transcription] Transcription completed: ${result.text.length} characters`);
+          
+          // Update meeting with transcript
+          await db.updateMeeting(input.meetingId, {
+            transcript: result.text,
+          });
+          
+          console.log(`[Transcription] Meeting ${input.meetingId} updated with transcript`);
+          
+          return {
+            success: true,
+            transcript: result.text,
+            language: result.language,
+            duration: result.duration,
+            segments: result.segments,
+          };
+        } catch (error) {
+          console.error('[Transcription] Failed:', error);
+          throw new Error(error instanceof Error ? error.message : 'Transcription failed');
+        }
       }),
   }),
 

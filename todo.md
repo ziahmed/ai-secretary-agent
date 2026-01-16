@@ -386,3 +386,15 @@
 - [x] Update JAAS_API_KEY environment variable to correct value (a8272e)
 - [x] JWT now generates with correct kid: vpaas-magic-cookie-5dda5ad5e0a84ab3836b4d6cb3f95000/a8272e
 - [ ] Test authentication in browser with corrected API key
+
+## Browser Recording + Auto-Transcription
+- [x] Create tRPC procedure for audio transcription using Whisper API
+- [x] Create tRPC procedure for uploading audio to S3 storage
+- [x] Create browser audio recording component with MediaRecorder API
+- [x] Add recording controls (start/stop/pause) to meeting room UI
+- [x] Add recording status indicator (recording time, file size)
+- [x] Implement automatic S3 upload after recording stops
+- [x] Implement automatic Whisper transcription after upload
+- [x] Save transcript to meeting record in database
+- [ ] Add transcript display in meeting details page
+- [x] Test full recording → upload → transcription → storage flow (8 tests passing)
