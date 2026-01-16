@@ -56,9 +56,9 @@ export const appRouter = router({
           input.duration || 60
         );
         
-        // Generate a unique Google Meet-style link
-        const meetingCode = Math.random().toString(36).substring(2, 12);
-        const meetLink = `https://meet.google.com/${meetingCode}`;
+        // Generate a unique Jitsi Meet link
+        const meetingCode = Math.random().toString(36).substring(2, 15).replace(/[^a-z0-9]/g, '');
+        const meetLink = `https://meet.jit.si/${meetingCode}`;
         
         const meeting = await db.createMeeting({
           ...input,
@@ -233,9 +233,9 @@ export const appRouter = router({
           throw new Error('Meeting not found');
         }
         
-        // Generate a unique Google Meet-style link
-        const meetingCode = Math.random().toString(36).substring(2, 12);
-        const meetLink = `https://meet.google.com/${meetingCode}`;
+        // Generate a unique Jitsi Meet link
+        const meetingCode = Math.random().toString(36).substring(2, 15).replace(/[^a-z0-9]/g, '');
+        const meetLink = `https://meet.jit.si/${meetingCode}`;
         
         // Update meeting with new meet link
         await db.updateMeeting(input.id, { meetLink });

@@ -147,7 +147,7 @@ function generateEmailHTML(invite: MeetingInvite): string {
     <div class="detail-row">
       <div class="label">Join Meeting</div>
       <div class="value">
-        <a href="${invite.meetLink}" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 5px;">🎥 Join Google Meet</a>
+        <a href="${invite.meetLink}" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 5px;">🎥 Join Video Call</a>
       </div>
     </div>
     ` : ''}

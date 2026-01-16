@@ -329,3 +329,10 @@
 - [x] Create backend delete procedures for each section (deleteReviewItem, deleteEmailLog)
 - [x] Add confirmation dialogs before deletion
 - [x] Test delete functionality
+
+## Replace Google Meet with Jitsi Meet
+- [x] Update meeting link generation to use Jitsi Meet format (meet.jit.si)
+- [x] Change UI labels from "Google Meet" to "Video Call"
+- [x] Update email templates to use Jitsi Meet links
+- [x] Update button text and toast messages
+- [x] Test Jitsi Meet links work correctly

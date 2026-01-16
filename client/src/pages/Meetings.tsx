@@ -121,7 +121,7 @@ export default function Meetings() {
   const generateMeetLinkMutation = trpc.meetings.generateMeetLink.useMutation({
     onSuccess: (data) => {
       utils.meetings.list.invalidate();
-      toast.success("Google Meet link generated successfully");
+      toast.success("Jitsi Meet link generated successfully");
     },
     onError: (error) => {
       toast.error(error.message || "Failed to generate meet link");
@@ -481,7 +481,7 @@ export default function Meetings() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
                       >
-                        🎥 Join Google Meet
+                        🎥 Join Video Call
                       </a>
                     </div>
                   )}
