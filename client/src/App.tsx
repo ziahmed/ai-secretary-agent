@@ -14,6 +14,7 @@ import Chat from "./pages/Chat";
 import Calendar from "./pages/Calendar";
 import EmailTracking from "./pages/EmailTracking";
 import ApprovalHistory from "./pages/ApprovalHistory";
+import MeetingRoom from "./pages/MeetingRoom";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/calendar" component={Calendar} />
       <Route path="/email-tracking" component={EmailTracking} />
       <Route path="/approval-history" component={ApprovalHistory} />
+      <Route path="/meeting-room/:id" component={MeetingRoom} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

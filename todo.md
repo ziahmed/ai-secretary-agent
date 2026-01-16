@@ -351,3 +351,14 @@
 - [x] If custom link provided, use it instead of auto-generating Jitsi link
 - [x] Added help text explaining auto-generation if left empty
 - [x] Test with Google Meet, Zoom, Teams links
+
+## Jitsi Meet Integration with Recording
+- [ ] Create JitsiMeet React component using Jitsi Meet API
+- [ ] Add meeting room page to host embedded Jitsi meetings
+- [ ] Configure Jitsi with recording enabled (Jibri integration)
+- [ ] Add "Join Meeting" button to navigate to embedded Jitsi room
+- [ ] Implement recording start/stop controls
+- [ ] Add webhook/callback to capture recording completion
+- [ ] Automatically download and process recordings for transcripts
+- [ ] Upload processed transcripts to Google Drive
+- [ ] Test complete workflow from meeting to transcript

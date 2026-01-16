@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Calendar, Plus, FileText, Mail, ArrowLeft, X, CalendarClock, Upload, ExternalLink, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,7 +16,8 @@ export default function Meetings() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [meetingDate, setMeetingDate] = useState("");
-  const [location, setLocation] = useState("");
+  const [meetingLocation, setMeetingLocation] = useState("");
+  const [, setLocation] = useLocation();
   const [customMeetLink, setCustomMeetLink] = useState("");
   const [participants, setParticipants] = useState("");
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
@@ -198,7 +200,7 @@ export default function Meetings() {
       title,
       description,
       meetingDate: new Date(meetingDate),
-      location,
+      location: meetingLocation,
       customMeetLink: customMeetLink || undefined,
       participants: selectedParticipants.length > 0 ? selectedParticipants : undefined,
     });
@@ -285,8 +287,8 @@ export default function Meetings() {
                   <Label htmlFor="location" className="text-foreground">Location</Label>
                   <Input
                     id="location"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    value={meetingLocation}
+                    onChange={(e) => setMeetingLocation(e.target.value)}
                     placeholder="Conference Room A"
                   />
                 </div>
@@ -491,14 +493,12 @@ export default function Meetings() {
                   {meeting.meetLink && (
                     <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <p className="text-sm font-medium text-blue-800 mb-2">Video Conference</p>
-                      <a 
-                        href={meeting.meetLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                      <Button
+                        onClick={() => setLocation(`/meeting-room/${meeting.id}`)}
+                        className="inline-flex items-center gap-2"
                       >
                         🎥 Join Video Call
-                      </a>
+                      </Button>
                     </div>
                   )}
 
