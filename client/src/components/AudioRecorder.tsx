@@ -101,17 +101,10 @@ export function AudioRecorder({ meetingId, onTranscriptComplete }: AudioRecorder
         setRecordingTime(prev => prev + 1);
       }, 1000);
 
-      toast({
-        title: 'Recording started',
-        description: 'Your microphone is now recording',
-      });
+      toast.success('Your microphone is now recording');
     } catch (error) {
       console.error('Failed to start recording:', error);
-      toast({
-        title: 'Recording failed',
-        description: error instanceof Error ? error.message : 'Could not access microphone',
-        variant: 'destructive',
-      });
+      toast.error(error instanceof Error ? error.message : 'Could not access microphone');
     }
   };
 
@@ -142,10 +135,7 @@ export function AudioRecorder({ meetingId, onTranscriptComplete }: AudioRecorder
         throw new Error(`Recording is too large (${sizeMB.toFixed(2)}MB). Maximum size is 16MB.`);
       }
 
-      toast({
-        title: 'Processing recording',
-        description: 'Uploading audio file...',
-      });
+      toast.loading('Uploading audio file...');
 
       // Convert to base64
       const base64Audio = await blobToBase64(audioBlob);
@@ -157,10 +147,7 @@ export function AudioRecorder({ meetingId, onTranscriptComplete }: AudioRecorder
         meetingId,
       });
 
-      toast({
-        title: 'Upload complete',
-        description: 'Transcribing audio with Whisper AI...',
-      });
+      toast.loading('Transcribing audio with Whisper AI...');
 
       // Transcribe with Whisper
       const transcriptResult = await transcribeMutation.mutateAsync({
@@ -169,10 +156,7 @@ export function AudioRecorder({ meetingId, onTranscriptComplete }: AudioRecorder
         language: 'en',
       });
 
-      toast({
-        title: 'Transcription complete',
-        description: `Generated ${transcriptResult.transcript.length} characters of text`,
-      });
+      toast.success(`Transcription complete - ${transcriptResult.transcript.length} characters`);
 
       // Callback with transcript
       if (onTranscriptComplete) {
@@ -181,11 +165,7 @@ export function AudioRecorder({ meetingId, onTranscriptComplete }: AudioRecorder
 
     } catch (error) {
       console.error('Failed to process recording:', error);
-      toast({
-        title: 'Processing failed',
-        description: error instanceof Error ? error.message : 'Failed to transcribe audio',
-        variant: 'destructive',
-      });
+      toast.error(error instanceof Error ? error.message : 'Failed to transcribe audio');
     } finally {
       setIsProcessing(false);
       audioChunksRef.current = [];
