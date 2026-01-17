@@ -1,0 +1,20 @@
+{
+  "query": "SELECT id, title, meetLink FROM meetings ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2Te1FGeWG8CduV2.root --database 7rjMvSLYa8L7rAbqjymCF3 --execute SELECT id, title, meetLink FROM meetings ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "30003",
+      "title": "Test for Zia",
+      "meetLink": "NULL"
+    },
+    {
+      "id": "30001",
+      "title": "Trial Run for AI Secretary",
+      "meetLink": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tmeetLink\n30003\tTest for Zia\tNULL\n30001\tTrial Run for AI Secretary\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1513
+}
