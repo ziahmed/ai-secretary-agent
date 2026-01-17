@@ -131,10 +131,7 @@ export default function MeetingRoom() {
               <AudioRecorder
                 meetingId={parseInt(id || '0')}
                 onTranscriptComplete={(transcript) => {
-                  toast({
-                    title: 'Transcript saved',
-                    description: 'Meeting transcript has been saved successfully',
-                  });
+                  toast.success('Meeting transcript has been saved successfully');
                 }}
               />
             </div>
