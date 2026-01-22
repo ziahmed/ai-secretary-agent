@@ -1,54 +1,19 @@
 {
-  "version": "7",
-  "dialect": "mysql",
+  "version": "5",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1768355251704,
-      "tag": "0000_slimy_roughhouse",
+      "version": "7",
+      "when": 1768663031614,
+      "tag": "0000_lush_jean_grey",
       "breakpoints": true
     },
     {
       "idx": 1,
-      "version": "5",
-      "when": 1768355380729,
-      "tag": "0001_petite_purifiers",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1768359273817,
-      "tag": "0002_medical_caretaker",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1768364355103,
-      "tag": "0003_wakeful_diamondback",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1768364899813,
-      "tag": "0004_easy_kingpin",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1768488597021,
-      "tag": "0005_secret_hannibal_king",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1768497923875,
-      "tag": "0006_faulty_crystal",
+      "version": "7",
+      "when": 1769083455097,
+      "tag": "0001_ambiguous_puff_adder",
       "breakpoints": true
     }
   ]
