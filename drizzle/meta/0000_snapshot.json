@@ -1,72 +1,67 @@
 {
-  "id": "9b407087-093c-4e59-a87a-079001b82500",
+  "version": "5",
+  "dialect": "mysql",
+  "id": "80f55359-5979-4a9b-afa9-7deed022f31d",
   "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "7",
-  "dialect": "postgresql",
   "tables": {
-    "public.actionItems": {
+    "actionItems": {
       "name": "actionItems",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
-          "primaryKey": true,
+          "type": "int",
+          "primaryKey": false,
           "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "actionItems_id_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "autoincrement": true
         },
         "meetingId": {
           "name": "meetingId",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "taskId": {
           "name": "taskId",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "ownerId": {
           "name": "ownerId",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "ownerEmail": {
           "name": "ownerEmail",
           "type": "varchar(320)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "deadline": {
           "name": "deadline",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "status": {
           "name": "status",
-          "type": "actionItems_status",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
           "default": "'pending'"
         },
         "createdAt": {
@@ -74,670 +69,690 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "actionItems_id": {
+          "name": "actionItems_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "checkConstraint": {}
     },
-    "public.chatMessages": {
+    "chatMessages": {
       "name": "chatMessages",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
-          "primaryKey": true,
+          "type": "int",
+          "primaryKey": false,
           "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "chatMessages_id_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "autoincrement": true
         },
         "userId": {
           "name": "userId",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "role": {
           "name": "role",
-          "type": "chat_role",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "content": {
           "name": "content",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "metadata": {
           "name": "metadata",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "chatMessages_id": {
+          "name": "chatMessages_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "checkConstraint": {}
     },
-    "public.emailLogs": {
+    "emailLogs": {
       "name": "emailLogs",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
-          "primaryKey": true,
+          "type": "int",
+          "primaryKey": false,
           "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "emailLogs_id_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "autoincrement": true
         },
         "recipientEmail": {
           "name": "recipientEmail",
           "type": "varchar(320)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "subject": {
           "name": "subject",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "body": {
           "name": "body",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "emailType": {
           "name": "emailType",
-          "type": "emailType",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "relatedTaskId": {
           "name": "relatedTaskId",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "relatedMeetingId": {
           "name": "relatedMeetingId",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "sentAt": {
           "name": "sentAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         },
         "status": {
           "name": "status",
-          "type": "email_status",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
           "default": "'sent'"
         },
         "deliveredAt": {
           "name": "deliveredAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "openedAt": {
           "name": "openedAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "trackingId": {
           "name": "trackingId",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "emailLogs_id": {
+          "name": "emailLogs_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "checkConstraint": {}
     },
-    "public.gmailSyncState": {
+    "gmailSyncState": {
       "name": "gmailSyncState",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
-          "primaryKey": true,
+          "type": "int",
+          "primaryKey": false,
           "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "gmailSyncState_id_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "autoincrement": true
         },
         "userId": {
           "name": "userId",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "email": {
           "name": "email",
           "type": "varchar(320)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "lastSyncToken": {
           "name": "lastSyncToken",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "lastSyncedAt": {
           "name": "lastSyncedAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "syncStatus": {
           "name": "syncStatus",
-          "type": "syncStatus",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
           "default": "'active'"
         },
         "errorMessage": {
           "name": "errorMessage",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "gmailSyncState_id": {
+          "name": "gmailSyncState_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "checkConstraint": {}
     },
-    "public.meetings": {
+    "meetings": {
       "name": "meetings",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
-          "primaryKey": true,
+          "type": "int",
+          "primaryKey": false,
           "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "meetings_id_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "autoincrement": true
         },
         "title": {
           "name": "title",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "meetingDate": {
           "name": "meetingDate",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "duration": {
           "name": "duration",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "location": {
           "name": "location",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "meetLink": {
           "name": "meetLink",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "participants": {
           "name": "participants",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "status": {
           "name": "status",
-          "type": "meetings_status",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
           "default": "'scheduled'"
         },
         "minutesUrl": {
           "name": "minutesUrl",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "summaryText": {
           "name": "summaryText",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "transcriptUrl": {
           "name": "transcriptUrl",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "externalId": {
           "name": "externalId",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "externalSource": {
           "name": "externalSource",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "createdBy": {
           "name": "createdBy",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "meetings_id": {
+          "name": "meetings_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "checkConstraint": {}
     },
-    "public.reviewQueue": {
+    "reviewQueue": {
       "name": "reviewQueue",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
-          "primaryKey": true,
+          "type": "int",
+          "primaryKey": false,
           "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "reviewQueue_id_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "autoincrement": true
         },
         "type": {
           "name": "type",
-          "type": "review_type",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "referenceId": {
           "name": "referenceId",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "content": {
           "name": "content",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "originalContent": {
           "name": "originalContent",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "metadata": {
           "name": "metadata",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "status": {
           "name": "status",
-          "type": "review_status",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
           "default": "'pending'"
         },
         "reviewedBy": {
           "name": "reviewedBy",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "reviewNotes": {
           "name": "reviewNotes",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "reviewedAt": {
           "name": "reviewedAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "createdBy": {
           "name": "createdBy",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "reviewQueue_id": {
+          "name": "reviewQueue_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "checkConstraint": {}
     },
-    "public.tasks": {
+    "tasks": {
       "name": "tasks",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
-          "primaryKey": true,
+          "type": "int",
+          "primaryKey": false,
           "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "tasks_id_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "autoincrement": true
         },
         "title": {
           "name": "title",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "ownerId": {
           "name": "ownerId",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "ownerEmail": {
           "name": "ownerEmail",
           "type": "varchar(320)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "deadline": {
           "name": "deadline",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "priority": {
           "name": "priority",
-          "type": "priority",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
           "default": "'medium'"
         },
         "status": {
           "name": "status",
-          "type": "tasks_status",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
           "default": "'open'"
         },
         "meetingId": {
           "name": "meetingId",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "createdBy": {
           "name": "createdBy",
-          "type": "integer",
+          "type": "int",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "lastReminderSent": {
           "name": "lastReminderSent",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "escalatedAt": {
           "name": "escalatedAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "tasks_id": {
+          "name": "tasks_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "checkConstraint": {}
     },
-    "public.users": {
+    "users": {
       "name": "users",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
-          "primaryKey": true,
+          "type": "int",
+          "primaryKey": false,
           "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "users_id_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "autoincrement": true
         },
         "openId": {
           "name": "openId",
           "type": "varchar(64)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "name": {
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "email": {
           "name": "email",
           "type": "varchar(320)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "loginMethod": {
           "name": "loginMethod",
           "type": "varchar(64)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "autoincrement": false
         },
         "role": {
           "name": "role",
-          "type": "role",
-          "typeSchema": "public",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
           "default": "'user'"
         },
         "createdAt": {
@@ -745,155 +760,55 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         },
         "lastSignedIn": {
           "name": "lastSignedIn",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "users_id": {
+          "name": "users_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
       "uniqueConstraints": {
         "users_openId_unique": {
           "name": "users_openId_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "openId"
           ]
         }
       },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "checkConstraint": {}
     }
   },
-  "enums": {
-    "public.actionItems_status": {
-      "name": "actionItems_status",
-      "schema": "public",
-      "values": [
-        "pending",
-        "assigned",
-        "completed"
-      ]
-    },
-    "public.chat_role": {
-      "name": "chat_role",
-      "schema": "public",
-      "values": [
-        "user",
-        "assistant"
-      ]
-    },
-    "public.email_status": {
-      "name": "email_status",
-      "schema": "public",
-      "values": [
-        "sent",
-        "failed",
-        "delivered",
-        "opened"
-      ]
-    },
-    "public.emailType": {
-      "name": "emailType",
-      "schema": "public",
-      "values": [
-        "reminder",
-        "escalation",
-        "meeting_invite",
-        "meeting_cancellation",
-        "status_update"
-      ]
-    },
-    "public.meetings_status": {
-      "name": "meetings_status",
-      "schema": "public",
-      "values": [
-        "scheduled",
-        "completed",
-        "cancelled"
-      ]
-    },
-    "public.priority": {
-      "name": "priority",
-      "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high",
-        "urgent"
-      ]
-    },
-    "public.review_status": {
-      "name": "review_status",
-      "schema": "public",
-      "values": [
-        "pending",
-        "approved",
-        "rejected",
-        "edited"
-      ]
-    },
-    "public.review_type": {
-      "name": "review_type",
-      "schema": "public",
-      "values": [
-        "meeting_summary",
-        "action_items",
-        "email_draft",
-        "translation"
-      ]
-    },
-    "public.role": {
-      "name": "role",
-      "schema": "public",
-      "values": [
-        "user",
-        "admin"
-      ]
-    },
-    "public.syncStatus": {
-      "name": "syncStatus",
-      "schema": "public",
-      "values": [
-        "active",
-        "paused",
-        "error"
-      ]
-    },
-    "public.tasks_status": {
-      "name": "tasks_status",
-      "schema": "public",
-      "values": [
-        "open",
-        "in_progress",
-        "completed",
-        "blocked",
-        "overdue"
-      ]
-    }
-  },
-  "schemas": {},
-  "sequences": {},
-  "roles": {},
-  "policies": {},
   "views": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {},
+    "indexes": {}
   }
 }

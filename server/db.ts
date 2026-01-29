@@ -1,6 +1,5 @@
 import { eq, desc, and, or, lt, gte, sql, ne } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users, 
   meetings, InsertMeeting, Meeting,
@@ -18,7 +17,7 @@ let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(postgres(process.env.DATABASE_URL));
+      _db = drizzle(process.env.DATABASE_URL);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -79,9 +78,15 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
+    // Use a check-then-insert-or-update pattern for compatibility
+    const existing = await getUserByOpenId(user.openId);
+    if (existing) {
+      // User exists, update them
+      await db.update(users).set(updateSet).where(eq(users.openId, user.openId));
+    } else {
+      // New user, insert
+      await db.insert(users).values(values);
+    }
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
