@@ -194,10 +194,16 @@ export default function Meetings() {
       return;
     }
 
+    const date = new Date(meetingDate);
+    if (isNaN(date.getTime()) || date.getFullYear() < 1900) {
+      toast.error("Please enter a valid meeting date and time");
+      return;
+    }
+
     createMutation.mutate({
       title,
       description,
-      meetingDate: new Date(meetingDate),
+      meetingDate: date,
       location,
       participants: selectedParticipants.length > 0 ? selectedParticipants : undefined,
     });
