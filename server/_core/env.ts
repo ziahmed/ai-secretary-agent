@@ -10,4 +10,8 @@ export const ENV = {
   jaasAppId: process.env.JAAS_APP_ID ?? "",
   jaasApiKey: process.env.JAAS_API_KEY ?? "",
   jaasPrivateKey: process.env.JAAS_PRIVATE_KEY ?? "",
+  googleClientId: process.env.GOOGLE_CLIENT_ID ?? "",
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+  googleRefreshToken: process.env.GOOGLE_REFRESH_TOKEN ?? "",
+  googleAccountEmail: process.env.GOOGLE_ACCOUNT_EMAIL ?? "",
 };

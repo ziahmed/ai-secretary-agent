@@ -137,7 +137,7 @@ describe('Transcription Router', () => {
 
       // Verify meeting was updated with transcript
       expect(db.updateMeeting).toHaveBeenCalledWith(123, {
-        transcript: mockTranscript.text,
+        summaryText: mockTranscript.text,
       });
     });
 
@@ -257,7 +257,7 @@ describe('Transcription Router', () => {
       expect(transcribeResult.success).toBe(true);
       expect(transcribeResult.transcript).toBe(mockTranscript.text);
       expect(db.updateMeeting).toHaveBeenCalledWith(456, {
-        transcript: mockTranscript.text,
+        summaryText: mockTranscript.text,
       });
     });
   });

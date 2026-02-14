@@ -396,5 +396,5 @@
 - [x] Implement automatic S3 upload after recording stops
 - [x] Implement automatic Whisper transcription after upload
 - [x] Save transcript to meeting record in database
-- [ ] Add transcript display in meeting details page
+- [x] Add transcript display in meeting details page
 - [x] Test full recording → upload → transcription → storage flow (8 tests passing)

@@ -78,15 +78,9 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    // Use a check-then-insert-or-update pattern for compatibility
-    const existing = await getUserByOpenId(user.openId);
-    if (existing) {
-      // User exists, update them
-      await db.update(users).set(updateSet).where(eq(users.openId, user.openId));
-    } else {
-      // New user, insert
-      await db.insert(users).values(values);
-    }
+    await db.insert(users).values(values).onDuplicateKeyUpdate({
+      set: updateSet,
+    });
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;

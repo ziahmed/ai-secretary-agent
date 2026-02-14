@@ -50,7 +50,9 @@ export const appRouter = router({
       .input(z.object({
         title: z.string(),
         description: z.string().optional(),
-        meetingDate: z.date(),
+        meetingDate: z.date().refine(date => date.getFullYear() > 1900, {
+          message: "Meeting date must be after year 1900",
+        }),
         duration: z.number().optional(),
         location: z.string().optional(),
         participants: z.array(z.string()).optional(),
@@ -111,7 +113,9 @@ export const appRouter = router({
         id: z.number(),
         title: z.string().optional(),
         description: z.string().optional(),
-        meetingDate: z.date().optional(),
+        meetingDate: z.date().optional().refine(date => !date || date.getFullYear() > 1900, {
+          message: "Meeting date must be after year 1900",
+        }),
         duration: z.number().optional(),
         location: z.string().optional(),
         participants: z.array(z.string()).optional(),
@@ -1378,7 +1382,7 @@ Priority: ${task.priority}`
           
           // Update meeting with transcript
           await db.updateMeeting(input.meetingId, {
-            summaryText: result.text,
+            transcript: result.text,
           });
           
           console.log(`[Transcription] Meeting ${input.meetingId} updated with transcript`);

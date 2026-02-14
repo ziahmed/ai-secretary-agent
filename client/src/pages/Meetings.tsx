@@ -194,10 +194,16 @@ export default function Meetings() {
       return;
     }
 
+    const date = new Date(meetingDate);
+    if (isNaN(date.getTime()) || date.getFullYear() < 1900) {
+      toast.error("Please enter a valid meeting date and time");
+      return;
+    }
+
     createMutation.mutate({
       title,
       description,
-      meetingDate: new Date(meetingDate),
+      meetingDate: date,
       location,
       participants: selectedParticipants.length > 0 ? selectedParticipants : undefined,
     });
@@ -457,6 +463,15 @@ export default function Meetings() {
                     <div className="bg-muted/20 p-3 rounded-lg mb-4">
                       <p className="text-sm font-medium text-foreground mb-2">AI Summary:</p>
                       <p className="text-sm text-foreground">{meeting.summaryText}</p>
+                    </div>
+                  )}
+                  
+                  {meeting.transcript && (
+                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm font-medium text-blue-800 mb-2">Auto-Transcribed Transcript</p>
+                      <div className="bg-white p-3 rounded border border-blue-100 max-h-48 overflow-y-auto">
+                        <p className="text-sm text-foreground whitespace-pre-wrap">{meeting.transcript}</p>
+                      </div>
                     </div>
                   )}
                   
