@@ -1382,7 +1382,7 @@ Priority: ${task.priority}`
           
           // Update meeting with transcript
           await db.updateMeeting(input.meetingId, {
-            transcript: result.text,
+            summaryText: result.text,
           });
           
           console.log(`[Transcription] Meeting ${input.meetingId} updated with transcript`);

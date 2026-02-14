@@ -466,15 +466,6 @@ export default function Meetings() {
                     </div>
                   )}
                   
-                  {meeting.transcript && (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-sm font-medium text-blue-800 mb-2">Auto-Transcribed Transcript</p>
-                      <div className="bg-white p-3 rounded border border-blue-100 max-h-48 overflow-y-auto">
-                        <p className="text-sm text-foreground whitespace-pre-wrap">{meeting.transcript}</p>
-                      </div>
-                    </div>
-                  )}
-                  
                   {meeting.transcriptUrl && (
                     <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                       <p className="text-sm font-medium text-green-800 mb-1">Transcript Available</p>
