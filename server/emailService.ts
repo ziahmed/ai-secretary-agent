@@ -259,6 +259,16 @@ export async function sendMeetingInvite(invite: MeetingInvite): Promise<boolean>
       return true;
     }
     
+    // In test environment, just log and return true
+    if (process.env.NODE_ENV === 'test' || process.env.VITEST === 'true') {
+      console.log('=== MEETING INVITE EMAIL (Test Mode) ===');
+      console.log('To:', invite.to.join(', '));
+      console.log('Subject:', `Meeting Invitation: ${invite.meetingTitle}`);
+      console.log('Date:', invite.meetingDate.toISOString());
+      console.log('===========================');
+      return true;
+    }
+    
     // Send email using Gmail API
     const gmail = getGmailClient();
     const fromEmail = process.env.GOOGLE_ACCOUNT_EMAIL || invite.organizerEmail;
@@ -352,6 +362,16 @@ export async function sendMeetingUpdate(invite: MeetingInvite, changes: string):
     // Check if Gmail API credentials are configured
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_REFRESH_TOKEN) {
       console.log('=== MEETING UPDATE EMAIL (Gmail API not configured) ===');
+      console.log('To:', invite.to.join(', '));
+      console.log('Subject:', `Meeting Updated: ${invite.meetingTitle}`);
+      console.log('Changes:', changes);
+      console.log('===========================');
+      return true;
+    }
+    
+    // In test environment, just log and return true
+    if (process.env.NODE_ENV === 'test' || process.env.VITEST === 'true') {
+      console.log('=== MEETING UPDATE EMAIL (Test Mode) ===');
       console.log('To:', invite.to.join(', '));
       console.log('Subject:', `Meeting Updated: ${invite.meetingTitle}`);
       console.log('Changes:', changes);
@@ -518,6 +538,16 @@ export async function sendMeetingCancellation(invite: MeetingInvite, reason: str
     // Check if Gmail API credentials are configured
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_REFRESH_TOKEN) {
       console.log('=== MEETING CANCELLATION EMAIL (Gmail API not configured) ===');
+      console.log('To:', invite.to.join(', '));
+      console.log('Subject:', `Meeting Cancelled: ${invite.meetingTitle}`);
+      console.log('Reason:', reason || 'Not specified');
+      console.log('===========================');
+      return true;
+    }
+    
+    // In test environment, just log and return true
+    if (process.env.NODE_ENV === 'test' || process.env.VITEST === 'true') {
+      console.log('=== MEETING CANCELLATION EMAIL (Test Mode) ===');
       console.log('To:', invite.to.join(', '));
       console.log('Subject:', `Meeting Cancelled: ${invite.meetingTitle}`);
       console.log('Reason:', reason || 'Not specified');

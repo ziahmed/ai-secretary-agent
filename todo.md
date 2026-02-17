@@ -16,10 +16,10 @@
 - [x] Implement LLM integration for action item extraction
 - [x] Implement language translation API using LLM
 - [x] Create review queue procedures (submit for review, approve, reject)
-- [ ] Implement Gmail API integration for reading emails
+- [x] Implement Gmail API integration for reading emails
 - [x] Create email notification procedures for reminders and escalations
 - [x] Implement escalation detection logic for overdue tasks
-- [ ] Create calendar scheduling procedures
+- [x] Create calendar scheduling procedures
 
 ## Frontend UI Development
 - [x] Build dashboard layout with sidebar navigation
@@ -32,11 +32,11 @@
 - [x] Build task reminder and escalation management UI
 - [x] Implement meeting creation and editing forms
 - [x] Implement task creation and editing forms
-- [ ] Add calendar view for meetings and deadlines
+- [x] Add calendar view for meetings and deadlines
 
 ## Integration Features
-- [ ] Gmail OAuth integration setup (requires user credentials)
-- [ ] Email parsing for meeting invites and updates (requires Gmail API)
+- [x] Gmail OAuth integration setup (requires user credentials)
+- [x] Email parsing for meeting invites and updates (requires Gmail API)
 - [x] Automated reminder scheduling system
 - [x] Email sending integration for notifications
 - [x] File storage integration for meeting minutes and documents

@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { generateJaaSToken, getJaaSConfig } from './_core/jaas';
 
 describe('JaaS Integration', () => {
-  it('should generate valid JWT token with correct kid format', () => {
-    const token = generateJaaSToken({
+  it('should generate valid JWT token with correct kid format', async () => {
+    const token = await generateJaaSToken({
       roomName: 'test-room',
       userName: 'Test User',
       userEmail: 'test@example.com',
@@ -24,8 +24,8 @@ describe('JaaS Integration', () => {
     console.log('Generated JWT header:', header);
   });
 
-  it('should have correct payload structure', () => {
-    const token = generateJaaSToken({
+  it('should have correct payload structure', async () => {
+    const token = await generateJaaSToken({
       roomName: 'test-room',
       userName: 'Test User',
     });

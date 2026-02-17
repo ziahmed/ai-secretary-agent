@@ -1,7 +1,22 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 import { sendMeetingInvite, sendMeetingUpdate } from "./emailService";
 
 describe("emailService", () => {
+  beforeEach(() => {
+    // Mock environment variables for tests
+    process.env.GOOGLE_CLIENT_ID = "test-client-id";
+    process.env.GOOGLE_CLIENT_SECRET = "test-client-secret";
+    process.env.GOOGLE_REFRESH_TOKEN = "test-refresh-token";
+    process.env.GOOGLE_ACCOUNT_EMAIL = "secretary.omega2@gmail.com";
+  });
+
+  afterEach(() => {
+    // Clean up environment variables
+    delete process.env.GOOGLE_CLIENT_ID;
+    delete process.env.GOOGLE_CLIENT_SECRET;
+    delete process.env.GOOGLE_REFRESH_TOKEN;
+    delete process.env.GOOGLE_ACCOUNT_EMAIL;
+  });
   describe("sendMeetingInvite", () => {
     it("should successfully send meeting invite with all details", async () => {
       const invite = {
