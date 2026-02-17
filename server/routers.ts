@@ -1334,9 +1334,13 @@ Priority: ${task.priority}`
           
           // Generate unique filename
           const timestamp = Date.now();
-          const extension = input.mimeType.split('/')[1] || 'webm';
+          // Extract extension from mimeType (e.g., 'audio/webm;codecs=opus' -> 'webm')
+          const mimeTypeParts = input.mimeType.split('/')[1]?.split(';')[0] || 'webm';
+          const extension = mimeTypeParts.toLowerCase();
           const filename = `meeting-${input.meetingId}-${timestamp}.${extension}`;
           const fileKey = `recordings/${ctx.user.id}/${filename}`;
+          
+          console.log(`[Transcription] Audio file: ${filename}, mimeType: ${input.mimeType}, extension: ${extension}`);
           
           // Upload to S3
           const { url } = await storagePut(fileKey, audioBuffer, input.mimeType);

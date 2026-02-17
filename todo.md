@@ -398,3 +398,7 @@
 - [x] Save transcript to meeting record in database
 - [ ] Add transcript display in meeting details page
 - [x] Test full recording → upload → transcription → storage flow (8 tests passing)
+
+
+## Bug Fixes
+- [x] Fix transcription service request failure in meeting room recording
